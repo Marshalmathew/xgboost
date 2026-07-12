@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 # Set Kaggle config dir to current directory so it picks up kaggle.json
-os.environ["KAGGLE_CONFIG_DIR"] = r"C:\Users\marsh\agy2-projects\xgboost"
+os.environ["KAGGLE_CONFIG_DIR"] = os.path.dirname(os.path.abspath(__file__))
 
 commands = [
     ("datasets", "sgpjesus/bank-account-fraud-dataset-neurips-2022", r"06_projects_finance\02_fraud_detection"),
