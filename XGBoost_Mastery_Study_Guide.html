@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XGBoost Mastery Study Guide</title>
+    <!-- MathJax for rendering LaTeX math formulas -->
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\[', '\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <style>
+        @media print {
+            @page {
+                size: A4;
+                margin: 20mm 15mm 20mm 15mm;
+            }
+            body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+            .markdown-body pre {
+                border: 1px solid #ccc !important;
+                background-color: #f8f8f8 !important;
+                page-break-inside: avoid;
+            }
+            .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+                page-break-after: avoid;
+            }
+        }
+        body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 35px 25px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+        .markdown-body {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #c9d1d9;
+            background-color: #0d1117;
+        }
+        .markdown-body h1, .markdown-body h2 {
+            border-bottom-color: #21262d;
+            color: #58a6ff;
+        }
+        .markdown-body table {
+            display: table !important;
+            width: 100% !important;
+        }
+        .markdown-body pre {
+            background-color: #161b22 !important;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #238636;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+        }
+        .print-btn:hover {
+            background-color: #2ea043;
+        }
+        @media print {
+            .print-btn { display: none !important; }
+            body, .markdown-body { background: white !important; color: black !important; }
+            .markdown-body h1, .markdown-body h2 { color: #000 !important; border-bottom-color: #ccc !important; }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn" onclick="window.print()">🖨️ Save as PDF (Ctrl+P)</button>
+    <article class="markdown-body">
+        <h1 id="xgboost-mastery-from-theoretical-foundations-to-high-throughput-production">XGBoost Mastery: From Theoretical Foundations to High-Throughput Production</h1>
+<p><strong>Author</strong>: Marshal Mathew | Senior Manager &amp; Lead Data Scientist (7+ Years Banking ML)<br />
+<strong>Repository</strong>: <a href="file:///C:/Users/marsh/agy2-projects/xgboost">C:\Users\marsh\agy2-projects\xgboost</a>  </p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#module-01-theoretical-foundations">Module 01: Theoretical Foundations (CART, Bagging, Boosting, GBM)</a></li>
+<li><a href="#module-02-xgboost-core-mechanics">Module 02: XGBoost Core Mechanics (Taylor Expansion, Gradients, Hessians, Split Gain)</a></li>
+<li><a href="#module-03-basic-usage--tuning">Module 03: Basic Usage &amp; Tuning (GridSearch vs. Optuna Bayesian Optimization)</a></li>
+<li><a href="#module-04-advanced-features--diagnostics">Module 04: Advanced Features &amp; Diagnostics (SHAP Interpretability, Monotonicity, Feature Importance)</a></li>
+<li><a href="#module-05-production-deployment--serving">Module 05: Production Deployment &amp; Serving (JSON/UBJ Serialization, ONNX Runtime Benchmarking)</a></li>
+<li><a href="#module-06-banking--finance-projects">Module 06: Banking &amp; Finance Projects (Credit Scoring, AML Mule Detection, Fraud)</a></li>
+<li><a href="#module-07-distributed-xgboost-architecture">Module 07: Distributed XGBoost Architecture (PySpark, Dask, Ray Scaling)</a></li>
+</ol>
+<hr />
+<p><a id="module-01-theoretical-foundations"></a></p>
+<h2 id="module-01-theoretical-foundations">Module 01: Theoretical Foundations</h2>
+<p>Before diving into Extreme Gradient Boosting (XGBoost), it is crucial to understand the foundational algorithms it builds upon: <strong>Decision Trees</strong> and <strong>Ensemble Learning (Bagging vs. Boosting)</strong>.</p>
+<h3 id="1-decision-trees-cart">1. Decision Trees (CART)</h3>
+<p>XGBoost is an ensemble of Classification and Regression Trees (CART). Unlike standard decision trees that output categorical classes (like "Fraud" or "Not Fraud"), CARTs contain real-valued scores in each of their leaves, regardless of whether the task is classification or regression.</p>
+<h4 id="anatomy-of-a-decision-tree">Anatomy of a Decision Tree</h4>
+<ul>
+<li><strong>Root Node</strong>: The entire dataset.</li>
+<li><strong>Internal Nodes</strong>: Splitting rules (e.g., <code>Age &gt; 30</code>).</li>
+<li><strong>Leaf Nodes</strong>: The final output values (scores).</li>
+</ul>
+<h4 id="splitting-criteria">Splitting Criteria</h4>
+<p>Trees learn by finding splits that maximize information gain (or minimize impurity):
+- <strong>Gini Impurity</strong> (Classification):
+  $$\text{Gini} = 1 - \sum (p_i)^2$$
+- <strong>Mean Squared Error (MSE)</strong> (Regression):
+  $$\text{MSE} = \frac{1}{N} \sum (y_i - \bar{y})^2$$</p>
+<h3 id="2-ensemble-learning-the-wisdom-of-the-crowd">2. Ensemble Learning: The Wisdom of the Crowd</h3>
+<p>A single decision tree is prone to <strong>overfitting</strong> (high variance, low bias). Ensemble methods combine multiple weak learners to create a strong learner.</p>
+<ul>
+<li><strong>Bagging (Bootstrap Aggregating)</strong>: Train multiple independent trees in <em>parallel</em> on random subsets of the data with replacement. Reduces variance (e.g., Random Forest).</li>
+<li><strong>Boosting</strong>: Train trees <em>sequentially</em>. Each new tree tries to correct the errors (residuals) made by previous trees. Reduces bias and variance with regularization.</li>
+</ul>
+<h3 id="3-gradient-boosting-machines-gbm">3. Gradient Boosting Machines (GBM)</h3>
+<p>GBM fits new models to the <strong>residuals</strong> (the errors) of previous models:
+1. Predict target $Y$ with baseline model $F_1(x)$ (e.g., mean).
+2. Calculate residual error: $h_1(x) = Y - F_1(x)$.
+3. Train new tree $T_1(x)$ to predict residual $h_1(x)$.
+4. Update model: $F_2(x) = F_1(x) + \eta T_1(x)$, where $\eta$ is learning rate.</p>
+<hr />
+<p><a id="module-02-xgboost-core-mechanics"></a></p>
+<h2 id="module-02-xgboost-core-mechanics">Module 02: XGBoost Core Mechanics</h2>
+<p>XGBoost optimizes a regularized objective function using a 2nd-order Taylor expansion.</p>
+<h3 id="1-the-regularized-objective-function">1. The Regularized Objective Function</h3>
+<p>$$\mathcal{O}^{(t)} = \sum_{i=1}^n l(y_i, \hat{y}<em>i^{(t)}) + \Omega(f_t)$$
+Where the regularization penalty $\Omega(f_t)$ is defined as:
+$$\Omega(f_t) = \gamma T + \frac{1}{2} \lambda \sum</em>{j=1}^{T} w_j^2 + \alpha \sum_{j=1}^{T} |w_j|$$
+- $\gamma$: Complexity penalty per added leaf node (controls pruning).
+- $\lambda$: L2 regularization penalty on leaf weights.
+- $\alpha$: L1 regularization penalty on leaf weights.</p>
+<h3 id="2-2nd-order-taylor-expansion-gradients-hessians">2. 2nd-Order Taylor Expansion (Gradients &amp; Hessians)</h3>
+<p>Using Taylor expansion up to the 2nd order around $\hat{y}<em>i^{(t-1)}$:
+$$\mathcal{O}^{(t)} \approx \sum</em>{i=1}^n \left[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \Omega(f_t)$$
+Where:
+- First Derivative (Gradient): $g_i = \frac{\partial l(y_i, \hat{y}^{(t-1)})}{\partial \hat{y}^{(t-1)}}$
+- Second Derivative (Hessian): $h_i = \frac{\partial^2 l(y_i, \hat{y}^{(t-1)})}{\partial \hat{y}^{(t-1)2}}$</p>
+<h3 id="3-optimal-leaf-weight-split-gain">3. Optimal Leaf Weight &amp; Split Gain</h3>
+<p>The optimal weight $w_j^<em>$ for leaf $j$ containing sample set $I_j$ is solved analytically:
+$$w_j^</em> = -\frac{\sum_{i \in I_j} g_i}{\sum_{i \in I_j} h_i + \lambda}$$</p>
+<p>The Loss Reduction (Gain) evaluated for splitting a node into Left ($L$) and Right ($R$) children is:
+$$\text{Gain} = \frac{1}{2} \left[ \frac{(\sum_{i \in I_L} g_i)^2}{\sum_{i \in I_L} h_i + \lambda} + \frac{(\sum_{i \in I_R} g_i)^2}{\sum_{i \in I_R} h_i + \lambda} - \frac{(\sum_{i \in I} g_i)^2}{\sum_{i \in I} h_i + \lambda} \right] - \gamma$$
+- <strong>Pruning Rule</strong>: A split is kept ONLY if $\text{Gain} &gt; 0$. $\gamma$ acts as the threshold barrier for tree expansion!</p>
+<hr />
+<p><a id="module-03-basic-usage--tuning"></a></p>
+<h2 id="module-03-basic-usage-tuning">Module 03: Basic Usage &amp; Tuning</h2>
+<h3 id="step-3a-baseline-tuning-via-gridsearchcv">Step 3A: Baseline Tuning via <code>GridSearchCV</code></h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridSearchCV</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xgb</span>
+
+<span class="n">xgb_clf</span> <span class="o">=</span> <span class="n">xgb</span><span class="o">.</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="n">objective</span><span class="o">=</span><span class="s1">&#39;binary:logistic&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+    <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="s1">&#39;subsample&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">xgb_clf</span><span class="p">,</span> <span class="n">param_grid</span><span class="o">=</span><span class="n">param_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">)</span>
+<span class="n">grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GridSearch Best Params:&quot;</span><span class="p">,</span> <span class="n">grid_search</span><span class="o">.</span><span class="n">best_params_</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="step-3b-advanced-tuning-via-optuna-bayesian-optimization">Step 3B: Advanced Tuning via <code>Optuna</code> (Bayesian Optimization)</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xgb</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">objective</span><span class="p">(</span><span class="n">trial</span><span class="p">):</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;objective&#39;</span><span class="p">:</span> <span class="s1">&#39;binary:logistic&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;eval_metric&#39;</span><span class="p">:</span> <span class="s1">&#39;logloss&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;eta&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">&#39;eta&#39;</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">&#39;max_depth&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+        <span class="s1">&#39;subsample&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">&#39;subsample&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="s1">&#39;colsample_bytree&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">&#39;colsample_bytree&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">&#39;gamma&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+        <span class="s1">&#39;lambda&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">&#39;lambda&#39;</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">cv_res</span> <span class="o">=</span> <span class="n">xgb</span><span class="o">.</span><span class="n">cv</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">dtrain</span><span class="p">,</span> <span class="n">nfold</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_boost_round</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">early_stopping_rounds</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cv_res</span><span class="p">[</span><span class="s1">&#39;test-logloss-mean&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+<span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
+<span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optuna Best Parameters:&quot;</span><span class="p">,</span> <span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div>
+
+<hr />
+<p><a id="module-04-advanced-features--diagnostics"></a></p>
+<h2 id="module-04-advanced-features-diagnostics">Module 04: Advanced Features &amp; Diagnostics</h2>
+<h3 id="1-monotonic-constraints">1. Monotonic Constraints</h3>
+<p>Enforces domain business rules (e.g. Higher Income $\rightarrow$ Lower Credit Risk):</p>
+<div class="codehilite"><pre><span></span><code><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;objective&#39;</span><span class="p">:</span> <span class="s1">&#39;binary:logistic&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;tree_method&#39;</span><span class="p">:</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;monotone_constraints&#39;</span><span class="p">:</span> <span class="s1">&#39;(-1, 0, 0)&#39;</span> <span class="c1"># Income (-1: decreasing), Age (0: unconstrained)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="2-shap-shapley-additive-explanations-interpretability">2. SHAP (SHapley Additive exPlanations) Interpretability</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">shap</span>
+
+<span class="n">explainer</span> <span class="o">=</span> <span class="n">shap</span><span class="o">.</span><span class="n">TreeExplainer</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">shap_values</span> <span class="o">=</span> <span class="n">explainer</span><span class="o">.</span><span class="n">shap_values</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Global Summary Plot</span>
+<span class="n">shap</span><span class="o">.</span><span class="n">summary_plot</span><span class="p">(</span><span class="n">shap_values</span><span class="p">,</span> <span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Local Waterfall Prediction Explanation</span>
+<span class="n">shap</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">waterfall</span><span class="p">(</span><span class="n">explainer</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+
+<hr />
+<p><a id="module-05-production-deployment--serving"></a></p>
+<h2 id="module-05-production-deployment-serving">Module 05: Production Deployment &amp; Serving</h2>
+<h3 id="step-5a-native-model-serialization-json-ubj">Step 5A: Native Model Serialization (JSON &amp; UBJ)</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Save as Universal Binary JSON</span>
+<span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="s2">&quot;model.ubj&quot;</span><span class="p">)</span>
+
+<span class="c1"># Load model</span>
+<span class="n">booster</span> <span class="o">=</span> <span class="n">xgb</span><span class="o">.</span><span class="n">Booster</span><span class="p">()</span>
+<span class="n">booster</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;model.ubj&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<h3 id="step-5b-onnx-runtime-conversion-benchmark-onnxruntime">Step 5B: ONNX Runtime Conversion &amp; Benchmark (<code>onnxruntime</code>)</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">skl2onnx</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_sklearn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skl2onnx.common.data_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatTensorType</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">onnxruntime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rt</span>
+
+<span class="c1"># Convert to ONNX format</span>
+<span class="n">initial_type</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;float_input&#39;</span><span class="p">,</span> <span class="n">FloatTensorType</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))]</span>
+<span class="n">onnx_model</span> <span class="o">=</span> <span class="n">convert_sklearn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">initial_types</span><span class="o">=</span><span class="n">initial_type</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;model.onnx&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">onnx_model</span><span class="o">.</span><span class="n">SerializeToString</span><span class="p">())</span>
+
+<span class="c1"># Ultra-fast C++ ONNX Runtime Inference</span>
+<span class="n">sess</span> <span class="o">=</span> <span class="n">rt</span><span class="o">.</span><span class="n">InferenceSession</span><span class="p">(</span><span class="s2">&quot;model.onnx&quot;</span><span class="p">,</span> <span class="n">providers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CPUExecutionProvider&quot;</span><span class="p">])</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;float_input&quot;</span><span class="p">:</span> <span class="n">X_test</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)})</span>
+</code></pre></div>
+
+<hr />
+<p><a id="module-06-banking--finance-projects"></a></p>
+<h2 id="module-06-banking-finance-projects">Module 06: Banking &amp; Finance Projects</h2>
+<h3 id="credit-risk-scorecard-implementation-06_projects_finance03_credit_scoringcredit_scoringpy">Credit Risk Scorecard Implementation (<code>06_projects_finance/03_credit_scoring/credit_scoring.py</code>)</h3>
+<ul>
+<li>Incorporates CIBIL score features (<code>External_Cibil_Dataset.xlsx</code>).</li>
+<li>Enforces strict monotonic constraints on financial ratios to meet regulatory audit rules.</li>
+<li>Computes WoE (Weight of Evidence) and PSI (Population Stability Index).</li>
+</ul>
+<hr />
+<p><a id="module-07-distributed-xgboost-architecture"></a></p>
+<h2 id="module-07-distributed-xgboost-architecture">Module 07: Distributed XGBoost Architecture</h2>
+<p>For multi-gigabyte/terabyte datasets:
+- <strong>PySpark Integration</strong>: <code>xgboost.spark.SparkXGBClassifier</code> distributes training across Spark clusters.
+- <strong>Dask Integration</strong>: <code>dask_xgboost</code> handles out-of-core data frames on local or cloud worker pools.</p>
+    </article>
+</body>
+</html>

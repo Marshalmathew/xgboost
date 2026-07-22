@@ -1,7 +1,7 @@
 # %% [markdown]
 # # Basic Usage and Hyperparameter Tuning
 # 
-# This notebook covers standard training, understanding the DMatrix, and tuning hyperparameters using `Optuna`.
+# This notebook covers standard XGBoost training, DMatrix usage, GridSearch baseline tuning, and advanced Bayesian Optimization with `Optuna`.
 
 # %%
 import xgboost as xgb
@@ -10,8 +10,11 @@ import numpy as np
 import optuna
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score
+
+# Disable optuna logging verbosity for cleaner output
+optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 # %% [markdown]
 # ## 1. Data Preparation (DMatrix)
@@ -42,12 +45,41 @@ preds_binary = (preds_prob > 0.5).astype(int)
 print(f"Baseline Accuracy: {accuracy_score(y_test, preds_binary):.4f}")
 
 # %% [markdown]
-# ## 3. Hyperparameter Tuning with Optuna
-# Optuna uses Bayesian optimization to find the best hyperparameters. It's much faster and smarter than Grid Search.
+# ## 3A. Baseline Tuning: GridSearchCV (Scikit-Learn API)
+# GridSearch systematically searches through a manually specified parameter grid.
+
+# %%
+xgb_classifier = xgb.XGBClassifier(
+    objective='binary:logistic',
+    eval_metric='logloss',
+    random_state=42
+)
+
+param_grid = {
+    'n_estimators': [50, 100],
+    'max_depth': [3, 5, 7],
+    'learning_rate': [0.01, 0.1],
+    'subsample': [0.8, 1.0]
+}
+
+grid_search = GridSearchCV(
+    estimator=xgb_classifier,
+    param_grid=param_grid,
+    cv=3,
+    scoring='accuracy',
+    n_jobs=-1
+)
+
+grid_search.fit(X_train, y_train)
+print("GridSearchCV Best Parameters:", grid_search.best_params_)
+print(f"GridSearchCV Best Accuracy: {grid_search.best_score_:.4f}")
+
+# %% [markdown]
+# ## 3B. Advanced Tuning: Bayesian Optimization with Optuna
+# Optuna uses Bayesian optimization to sample promising hyperparameter regions. It is faster and handles continuous spaces much better than Grid Search.
 
 # %%
 def objective(trial):
-    # Suggest hyperparameters
     param = {
         'objective': 'binary:logistic',
         'eval_metric': 'logloss',
@@ -60,9 +92,6 @@ def objective(trial):
         'alpha': trial.suggest_float('alpha', 1e-3, 10.0, log=True),
         'lambda': trial.suggest_float('lambda', 1e-3, 10.0, log=True)
     }
-    
-    # Pruning (Early Stopping) callback for Optuna is available in `optuna.integration.XGBoostPruningCallback`
-    # For simplicity, we will just use XGBoost's built-in early stopping
     
     pruning_callback = optuna.integration.XGBoostPruningCallback(trial, 'test-logloss')
     
@@ -78,25 +107,22 @@ def objective(trial):
     
     return bst_cv['test-logloss-mean'].min()
 
-# %%
-# Run the optimization
-# Note: we suppress output here for brevity, but in practice you can watch Optuna explore the space!
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=20) # Usually 100+ for real projects
+study.optimize(objective, n_trials=20)
 
-print("Best trial:")
+print("\nOptuna Best Trial:")
 trial = study.best_trial
-print(f"  Value (LogLoss): {trial.value}")
-print("  Params: ")
+print(f"  Best LogLoss: {trial.value:.4f}")
+print("  Optimized Parameters: ")
 for key, value in trial.params.items():
     print(f"    {key}: {value}")
 
 # %% [markdown]
-# ## 4. Visualizing the Tuning Process
-# Optuna provides excellent visualizations to understand parameter importance.
+# ## 4. Visualizing Optuna Parameter Importance
 
 # %%
 optuna.visualization.matplotlib.plot_param_importances(study)
-plt.title("Hyperparameter Importances")
+plt.title("Hyperparameter Importances (Optuna)")
 plt.tight_layout()
 plt.show()
+
