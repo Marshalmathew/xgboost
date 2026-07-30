@@ -1,0 +1,20 @@
+[project]
+name = "xgboost-mastery"
+version = "0.1.0"
+description = "A comprehensive, end-to-end guide and project repository for mastering XGBoost."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "xgboost",
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "yfinance",
+    "shap",
+    "optuna",
+    "onnxruntime",
+    "skl2onnx",
+    "jupyter",
+    "ipykernel",
+]
