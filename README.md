@@ -9,10 +9,10 @@ The repository is organized progressively into the following sections:
 - **`01_theory_foundations/`**: The fundamental math and theory behind decision trees, ensemble learning, and gradient boosting.
 - **`02_xgboost_core_mechanics/`**: A deep dive into XGBoost's specific implementation, covering Taylor expansions, custom loss/objective functions, and core algorithms.
 - **`03_basic_usage_and_tuning/`**: Practical guides on how to train, evaluate, and fine-tune XGBoost models (hyperparameter optimization, cross-validation).
-- **`04_advanced_features/`**: Leveraging advanced capabilities such as monotonicity constraints, feature interactions, missing data handling, and custom evaluation metrics.
-- **`05_production_and_quirks/`**: Best practices for model serialization (JSON/PMML/ONNX), deployment strategies, and understanding the specific quirks and edge cases of the XGBoost library.
-- **`06_projects_finance/`**: Real-world, hands-on financial machine learning projects. Includes fraud detection, credit scoring, and marketing propensity modeling using large-scale banking datasets.
-- **`07_distributed_xgboost/`**: Scaling XGBoost training for massive datasets using distributed frameworks.
+- **`04_advanced_features/`**: Leveraging advanced capabilities such as monotonicity constraints, feature interactions, SHAP interpretability, and **native Multi-Output Vector Trees**.
+- **`05_production_and_quirks/`**: Best practices for model serialization (JSON/UBJ/ONNX), deployment strategies, and **Model Governance (PSI/CSI) & Fair Lending Compliance (Four-Fifths Rule)**.
+- **`06_projects_finance/`**: Real-world financial machine learning projects, including fraud detection, credit risk scorecards, marketing propensity, massive scale data handling, and **Survival Analysis (Accelerated Failure Time / AFT for Lifetime ECL)**.
+- **`07_distributed_xgboost/`**: Scaling XGBoost training for massive datasets using distributed frameworks (PySpark, Dask, Ray).
 
 ## 🚀 Getting Started
 

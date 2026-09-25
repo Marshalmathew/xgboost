@@ -31,6 +31,12 @@ SHAP uses cooperative game theory to distribute the "payout" (the prediction) am
 > [!WARNING]
 > **Environment Dependency Note**: The `shap` Python package has strict dependencies on `numba`, which currently does not support Python 3.13+. To run the SHAP visualization code in this module's notebook, ensure your environment is running Python 3.9 - 3.11.
 
+## 4. Multi-Output Trees & Vector-Leaf Representation
+
+In complex systems, predicting multiple related outcomes independently introduces latency and discards critical target covariance:
+- **Vector-Leaf Trees**: Rather than training $K$ independent models, modern XGBoost evaluates $K$-dimensional gradient and hessian tensors, storing weight vectors $\mathbf{w}_j \in \mathbb{R}^K$ at each leaf.
+- **Applications in Banking**: Jointly forecasting **Loss Given Default (LGD)** and **Exposure at Default (EAD)**, or predicting multi-label AML / fraud risk alerts simultaneously.
+
 ---
 
 ## 💻 Module Contents (Code)
@@ -39,3 +45,9 @@ SHAP uses cooperative game theory to distribute the "payout" (the prediction) am
    - Visualizes how the three native feature importance metrics (Weight, Gain, Cover) can completely contradict one another.
    - Demonstrates **Monotonic Constraints** by training two models on noisy data and plotting them side-by-side: one that wobbles, and one that obeys a strict step-function.
    - Implements **SHAP** for both Global (Summary Plot) and Local (Force Plot) interpretability.
+
+2. [multi_output_vector_trees.ipynb](./multi_output_vector_trees.ipynb)
+   - Mathematical formulation of vector leaf weights $\mathbf{w}_j^*$ and multidimensional split gains.
+   - Financial joint estimation of correlated credit risk targets (LGD & EAD).
+   - Multi-label classification with multi-dimensional probability predictions.
+   - Performance benchmark against `sklearn.multioutput.MultiOutputRegressor`.

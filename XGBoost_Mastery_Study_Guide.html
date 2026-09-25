@@ -95,7 +95,7 @@
     <article class="markdown-body">
         <h1 id="xgboost-mastery-from-theoretical-foundations-to-high-throughput-production">XGBoost Mastery: From Theoretical Foundations to High-Throughput Production</h1>
 <p><strong>Author</strong>: Marshal Mathew | Senior Manager &amp; Lead Data Scientist (7+ Years Banking ML)<br />
-<strong>Repository</strong>: <a href="file:///C:/Users/marsh/agy2-projects/xgboost">C:\Users\marsh\agy2-projects\xgboost</a>  </p>
+<strong>Repository</strong>: <a href=".">XGBoost Mastery</a>  </p>
 <hr />
 <h2 id="table-of-contents">Table of Contents</h2>
 <ol>
@@ -230,6 +230,14 @@ $$\text{Gain} = \frac{1}{2} \left[ \frac{(\sum_{i \in I_L} g_i)^2}{\sum_{i \in I
 <span class="n">shap</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">waterfall</span><span class="p">(</span><span class="n">explainer</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 </code></pre></div>
 
+<h3 id="3-multi-output-vector-leaf-trees">3. Multi-Output Vector-Leaf Trees</h3>
+<p>Evaluates $K$-dimensional gradient and hessian vectors per sample to preserve inter-target covariance (e.g. LGD and EAD jointly):</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Train native multi-target regression with 2D matrix Y (shape: N x 2)</span>
+<span class="n">reg</span> <span class="o">=</span> <span class="n">xgb</span><span class="o">.</span><span class="n">XGBRegressor</span><span class="p">(</span><span class="n">tree_method</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span> <span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">)</span> <span class="c1"># Y_train: [LGD, EAD]</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span> <span class="c1"># Output shape: (N_test, 2)</span>
+</code></pre></div>
+
 <hr />
 <p><a id="module-05-production-deployment--serving"></a></p>
 <h2 id="module-05-production-deployment-serving">Module 05: Production Deployment &amp; Serving</h2>
@@ -259,15 +267,48 @@ $$\text{Gain} = \frac{1}{2} \left[ \frac{(\sum_{i \in I_L} g_i)^2}{\sum_{i \in I
 <span class="n">preds</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;float_input&quot;</span><span class="p">:</span> <span class="n">X_test</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)})</span>
 </code></pre></div>
 
+<h3 id="step-5c-model-governance-fair-lending-compliance">Step 5C: Model Governance &amp; Fair Lending Compliance</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. Population Stability Index (PSI)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_psi</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">bin_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bin_edges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">exp_pct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">bin_edges</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-6</span>
+    <span class="n">act_pct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">bin_edges</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-6</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">act_pct</span> <span class="o">-</span> <span class="n">exp_pct</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">act_pct</span> <span class="o">/</span> <span class="n">exp_pct</span><span class="p">))</span>
+
+<span class="c1"># 2. Fair Lending 80% (Four-Fifths) Disparate Impact Ratio</span>
+<span class="n">di_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">approved</span><span class="p">[</span><span class="n">is_protected</span> <span class="o">==</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">approved</span><span class="p">[</span><span class="n">is_protected</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
+<span class="c1"># Pass condition: di_ratio &gt;= 0.80</span>
+</code></pre></div>
+
 <hr />
 <p><a id="module-06-banking--finance-projects"></a></p>
 <h2 id="module-06-banking-finance-projects">Module 06: Banking &amp; Finance Projects</h2>
-<h3 id="credit-risk-scorecard-implementation-06_projects_finance03_credit_scoringcredit_scoringpy">Credit Risk Scorecard Implementation (<code>06_projects_finance/03_credit_scoring/credit_scoring.py</code>)</h3>
+<h3 id="1-credit-risk-scorecard-implementation-06_projects_finance03_credit_scoring">1. Credit Risk Scorecard Implementation (<code>06_projects_finance/03_credit_scoring</code>)</h3>
 <ul>
 <li>Incorporates CIBIL score features (<code>External_Cibil_Dataset.xlsx</code>).</li>
 <li>Enforces strict monotonic constraints on financial ratios to meet regulatory audit rules.</li>
 <li>Computes WoE (Weight of Evidence) and PSI (Population Stability Index).</li>
 </ul>
+<h3 id="2-survival-analysis-accelerated-failure-time-06_projects_finance06_survival_credit_risk">2. Survival Analysis &amp; Accelerated Failure Time (<code>06_projects_finance/06_survival_credit_risk</code>)</h3>
+<ul>
+<li><strong>Objective</strong>: <code>survival:aft</code> on right-censored multi-year loan portfolios.</li>
+<li>Log-linear formulation: $\ln(T) = f(\mathbf{x}) + \sigma Z$ with bounds $[y_{\text{lower}}, y_{\text{upper}}]$.</li>
+<li>Computes lifetime survival curves $S(t | \mathbf{x})$, continuous cumulative default probabilities, and IFRS 9 / CECL Lifetime Expected Credit Loss.</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="n">dtrain</span> <span class="o">=</span> <span class="n">xgb</span><span class="o">.</span><span class="n">DMatrix</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+<span class="n">dtrain</span><span class="o">.</span><span class="n">set_float_info</span><span class="p">(</span><span class="s1">&#39;label_lower_bound&#39;</span><span class="p">,</span> <span class="n">y_lower</span><span class="p">)</span>
+<span class="n">dtrain</span><span class="o">.</span><span class="n">set_float_info</span><span class="p">(</span><span class="s1">&#39;label_upper_bound&#39;</span><span class="p">,</span> <span class="n">y_upper</span><span class="p">)</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;objective&#39;</span><span class="p">:</span> <span class="s1">&#39;survival:aft&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;aft_loss_distribution&#39;</span><span class="p">:</span> <span class="s1">&#39;normal&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;aft_loss_distribution_scale&#39;</span><span class="p">:</span> <span class="mf">1.20</span><span class="p">,</span>
+    <span class="s1">&#39;tree_method&#39;</span><span class="p">:</span> <span class="s1">&#39;hist&#39;</span>
+<span class="p">}</span>
+<span class="n">bst</span> <span class="o">=</span> <span class="n">xgb</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">dtrain</span><span class="p">,</span> <span class="n">num_boost_round</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</code></pre></div>
+
 <hr />
 <p><a id="module-07-distributed-xgboost-architecture"></a></p>
 <h2 id="module-07-distributed-xgboost-architecture">Module 07: Distributed XGBoost Architecture</h2>

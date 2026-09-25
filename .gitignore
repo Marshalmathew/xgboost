@@ -183,5 +183,15 @@ cython_debug/
 # Kaggle credentials
 kaggle.json
 
-# Exclude download script as requested
-download_kaggle.py
+# Large datasets and serializations
+data/
+*.csv
+*.xlsx
+*.parquet
+*.json.gz
+*.ubj
+*.onnx
+*.joblib
+model.json
+fraud_model.json
+isolation_forest.joblib

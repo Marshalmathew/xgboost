@@ -1,7 +1,7 @@
 # XGBoost Mastery: From Theoretical Foundations to High-Throughput Production
 
 **Author**: Marshal Mathew | Senior Manager & Lead Data Scientist (7+ Years Banking ML)  
-**Repository**: [C:\Users\marsh\agy2-projects\xgboost](file:///C:/Users/marsh/agy2-projects/xgboost)  
+**Repository**: [XGBoost Mastery](.)  
 
 ---
 
@@ -157,6 +157,15 @@ shap.summary_plot(shap_values, X_test)
 shap.plots.waterfall(explainer(X_test)[0])
 ```
 
+### 3. Multi-Output Vector-Leaf Trees
+Evaluates $K$-dimensional gradient and hessian vectors per sample to preserve inter-target covariance (e.g. LGD and EAD jointly):
+```python
+# Train native multi-target regression with 2D matrix Y (shape: N x 2)
+reg = xgb.XGBRegressor(tree_method='hist', n_estimators=100)
+reg.fit(X_train, Y_train) # Y_train: [LGD, EAD]
+preds = reg.predict(X_test) # Output shape: (N_test, 2)
+```
+
 ---
 
 <a id="module-05-production-deployment--serving"></a>
@@ -190,15 +199,48 @@ sess = rt.InferenceSession("model.onnx", providers=["CPUExecutionProvider"])
 preds = sess.run(None, {"float_input": X_test.astype(np.float32)})
 ```
 
+### Step 5C: Model Governance & Fair Lending Compliance
+```python
+# 1. Population Stability Index (PSI)
+def calculate_psi(expected, actual, bins=10):
+    bin_edges = np.percentile(expected, np.linspace(0, 100, bins + 1))
+    bin_edges[0], bin_edges[-1] = -np.inf, np.inf
+    exp_pct = np.histogram(expected, bins=np.unique(bin_edges))[0] / len(expected) + 1e-6
+    act_pct = np.histogram(actual, bins=np.unique(bin_edges))[0] / len(actual) + 1e-6
+    return np.sum((act_pct - exp_pct) * np.log(act_pct / exp_pct))
+
+# 2. Fair Lending 80% (Four-Fifths) Disparate Impact Ratio
+di_ratio = np.mean(approved[is_protected == 1]) / np.mean(approved[is_protected == 0])
+# Pass condition: di_ratio >= 0.80
+```
+
 ---
 
 <a id="module-06-banking--finance-projects"></a>
 ## Module 06: Banking & Finance Projects
 
-### Credit Risk Scorecard Implementation (`06_projects_finance/03_credit_scoring/credit_scoring.py`)
+### 1. Credit Risk Scorecard Implementation (`06_projects_finance/03_credit_scoring`)
 - Incorporates CIBIL score features (`External_Cibil_Dataset.xlsx`).
 - Enforces strict monotonic constraints on financial ratios to meet regulatory audit rules.
 - Computes WoE (Weight of Evidence) and PSI (Population Stability Index).
+
+### 2. Survival Analysis & Accelerated Failure Time (`06_projects_finance/06_survival_credit_risk`)
+- **Objective**: `survival:aft` on right-censored multi-year loan portfolios.
+- Log-linear formulation: $\ln(T) = f(\mathbf{x}) + \sigma Z$ with bounds $[y_{\text{lower}}, y_{\text{upper}}]$.
+- Computes lifetime survival curves $S(t | \mathbf{x})$, continuous cumulative default probabilities, and IFRS 9 / CECL Lifetime Expected Credit Loss.
+```python
+dtrain = xgb.DMatrix(X_train)
+dtrain.set_float_info('label_lower_bound', y_lower)
+dtrain.set_float_info('label_upper_bound', y_upper)
+
+params = {
+    'objective': 'survival:aft',
+    'aft_loss_distribution': 'normal',
+    'aft_loss_distribution_scale': 1.20,
+    'tree_method': 'hist'
+}
+bst = xgb.train(params, dtrain, num_boost_round=100)
+```
 
 ---
 
@@ -208,3 +250,4 @@ preds = sess.run(None, {"float_input": X_test.astype(np.float32)})
 For multi-gigabyte/terabyte datasets:
 - **PySpark Integration**: `xgboost.spark.SparkXGBClassifier` distributes training across Spark clusters.
 - **Dask Integration**: `dask_xgboost` handles out-of-core data frames on local or cloud worker pools.
+

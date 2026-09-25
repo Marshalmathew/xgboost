@@ -31,3 +31,9 @@ To cement your authority on XGBoost, you will apply the theory and mechanics to 
 - **Goal**: Push the limits of a single machine or practice distributed computing on a massive dataset.
 - **Data Source**: [Massive Bank Dataset - 1 Million Rows](https://www.kaggle.com/datasets/ksabishek/massive-bank-dataset-1-million-rows)
 - **Focus**: Memory management with DMatrix/Device DMatrix, utilizing `tree_method='hist'` or `gpu_hist` for ultra-fast training, and hyperparameter tuning at scale.
+
+## Project 6: Survival Analysis & AFT (Time-to-Default)
+- **Goal**: Estimate continuous time-to-default on right-censored multi-year loan cohorts to compute IFRS 9 / CECL Lifetime Expected Credit Loss.
+- **Directory**: `06_survival_credit_risk/`
+- **Focus**: Accelerated Failure Time (`survival:aft`), interval-censored DMatrix bounds (`label_lower_bound`, `label_upper_bound`), parametric distribution comparison (`normal`, `logistic`, `extreme`), Harrell's Concordance Index (C-Index), and individual survival curves $S(t | \mathbf{x})$.
+

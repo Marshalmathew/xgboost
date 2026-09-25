@@ -38,13 +38,26 @@ def load_models():
         
     return True
 
+import time
+
+# Pre-defined categorical levels learned during training to prevent single-row categorical code corruption
+CATEGORICAL_CATEGORIES = {
+    "payment_type": ["AA", "AB", "AC", "AD", "AE"],
+    "employment_status": ["CA", "CB", "CC", "CD", "CE", "CF", "CG"],
+    "housing_status": ["BA", "BB", "BC", "BD", "BE", "BF", "BG"],
+    "source": ["INTERNET", "TELEAPP"],
+    "device_os": ["windows", "macintosh", "linux", "x11", "other"],
+}
+
 def score_transaction(payload: dict) -> dict:
     """
-    Simulates an API endpoint.
-    Expects a dictionary of transaction features. Returns a decision payload.
+    Simulates a production-grade inference API endpoint.
+    Expects a dictionary of transaction features. Returns a decision payload with measured latency.
     """
     if _MODEL is None:
         return {"error": "Model not loaded"}
+
+    start_time = time.perf_counter()
 
     # 1. Convert JSON payload to DataFrame
     df = pd.DataFrame([payload])
@@ -52,9 +65,15 @@ def score_transaction(payload: dict) -> dict:
     # 2. Extract transaction metadata
     transaction_id = df.pop('transaction_id').iloc[0] if 'transaction_id' in df else "UNKNOWN_ID"
     
-    # 3. Handle Categoricals natively
-    cat_cols = df.select_dtypes(include=['object']).columns.tolist()
-    for col in cat_cols:
+    # 3. Handle Categoricals with fixed schemas matching training categories
+    for col, categories in CATEGORICAL_CATEGORIES.items():
+        if col in df.columns:
+            cat_type = pd.CategoricalDtype(categories=categories)
+            df[col] = df[col].astype(cat_type)
+            
+    # Convert any other remaining object columns to category
+    remaining_objs = df.select_dtypes(include=['object']).columns.tolist()
+    for col in remaining_objs:
         df[col] = df[col].astype('category')
         
     # 4. Inject Unsupervised Anomaly Score
@@ -65,25 +84,27 @@ def score_transaction(payload: dict) -> dict:
         # Mock score if Isolation Forest wasn't serialized
         df['Anomaly_Score'] = 0.5 
 
-    # 5. Compile DMatrix (Native Categoricals enabled)
-    # Note: We do NOT need the 'weight' column during inference!
-    dtest = xgb.DMatrix(df, enable_categorical=True)
+    # 5. Execute Optimized Inference (In-place if supported, fallback to DMatrix)
+    try:
+        raw_pred = _MODEL.inplace_predict(df)
+        fraud_prob = float(raw_pred[0])
+    except Exception:
+        dtest = xgb.DMatrix(df, enable_categorical=True)
+        fraud_prob = float(_MODEL.predict(dtest)[0])
     
-    # 6. Execute Sub-Millisecond Inference
-    fraud_prob = _MODEL.predict(dtest)[0]
-    
-    # 7. Apply Business Logic Threshold
-    # In a real pipeline, this threshold is dynamically pulled from Optuna logs
+    # 6. Apply Business Logic Threshold
     BLOCK_THRESHOLD = 0.35 
     decision = "BLOCK" if fraud_prob > BLOCK_THRESHOLD else "APPROVE"
     
-    # 8. Return Backend API Response
+    latency_ms = (time.perf_counter() - start_time) * 1000
+
+    # 7. Return Backend API Response with genuine measured latency
     return {
         "transaction_id": transaction_id,
-        "fraud_probability": float(fraud_prob),
+        "fraud_probability": round(fraud_prob, 4),
         "decision": decision,
-        "anomaly_flag": bool(df['Anomaly_Score'].iloc[0] > 0.8), # Mock flag
-        "latency_ms": "0.4ms" # Simulated sub-ms latency marker
+        "anomaly_flag": bool(df['Anomaly_Score'].iloc[0] > 0.8),
+        "latency_ms": f"{latency_ms:.2f}ms"
     }
 
 if __name__ == "__main__":

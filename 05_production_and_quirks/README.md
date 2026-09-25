@@ -26,6 +26,13 @@ If your production API requires sub-millisecond latency (e.g., high-frequency tr
 - You can export your XGBoost model to **ONNX** (Open Neural Network Exchange).
 - You can then serve the ONNX file using `onnxruntime` (a highly optimized C++ engine), often resulting in massive latency speedups compared to native Python execution.
 
+## 5. Model Governance, Stability (PSI/CSI) & Fair Lending Compliance
+
+Under banking regulations (SR 11-7, Basel III, ECOA), models deployed into production require continuous drift monitoring and fairness auditing:
+- **Population Stability Index (PSI)**: Quantifies score distribution shifts between baseline validation and live production scoring. Standard alert thresholds: Green ($<0.10$), Amber ($0.10-0.25$), Red ($\ge 0.25$).
+- **Characteristic Stability Index (CSI)**: Decomposes drift by individual input features to identify macro or operational data changes.
+- **Fair Lending & Four-Fifths (80%) Rule**: Computes Disparate Impact Ratios and Equal Opportunity Differences across protected demographic cohorts, enabling threshold calibration to mitigate adverse impact.
+
 ---
 
 ## 💻 Module Contents (Code)
@@ -34,3 +41,8 @@ If your production API requires sub-millisecond latency (e.g., high-frequency tr
    - **The Imbalance Trap**: Generates a 99-to-1 imbalanced dataset. Shows how a naive model achieves 99% accuracy but a 0% Recall (catching zero fraud). Then trains a model using `scale_pos_weight` and `aucpr` to successfully isolate the minority class.
    - **Serialization**: Demonstrates saving and loading models natively via JSON and UBJSON.
    - **ONNX Benchmark**: Converts an XGBoost model to ONNX format and runs a live latency benchmark comparing native Python prediction speed vs ONNX C++ Runtime speed.
+
+2. [model_governance_and_fairness.ipynb](./model_governance_and_fairness.ipynb)
+   - **Population Stability Index (PSI)**: Vectorized decile computation for baseline vs production time cohorts.
+   - **Characteristic Stability Index (CSI)**: Root-cause feature drift attribution.
+   - **Fair Lending Compliance**: Disparate impact ratio, four-fifths rule testing, and group-specific threshold recalibration for protected classes.
