@@ -54,6 +54,7 @@ graph TD
 │   ├── README.md                      # Serving architectures, known footguns & calibration
 │   ├── export_onnx_benchmark.py       # Ultra-low latency ONNX serving benchmark & parity check
 │   ├── probability_calibration.py     # Platt scaling, Isotonic regression & Brier score evaluation
+│   ├── conformal_risk_calibration.py  # Split conformal classification, CQR & Mondrian auditing
 │   ├── production_drift_monitoring.py # Feature/target drift detection (PSI, Evidently AI)
 │   ├── champion_challenger_policy.md  # Continuous retraining & rollout governance policy
 │   └── self_test_production.md        # Production quirks self-assessment
@@ -62,7 +63,8 @@ graph TD
 │   ├── 01_time_series_forecasting/    # Temporal cross-validation, walk-forward splits
 │   ├── 02_extreme_imbalance/          # Cost-sensitive learning, scale_pos_weight, PR-AUC
 │   ├── 03_risk_scoring/               # Monotonic constraints, scorecards, credit risk
-│   └── 04_survival_analysis/          # Accelerated failure time (AFT), censored data
+│   ├── 04_survival_analysis/          # Accelerated failure time (AFT), censored data
+│   └── 05_causal_uplift/              # CATE estimation (X-Learner) & Net Expected Value (NEV) policy
 ├── 07_distributed_[model]/            # Cluster scaling & distributed communication topologies
 │   ├── README.md                      # AllReduce vs Parameter Server topology & complexity
 │   ├── dask_pipeline.py               # Out-of-core Dask distributed training
@@ -104,23 +106,34 @@ graph TD
 
 ### Module 04: Advanced Features & Governance
 - **Nuanced Trade-offs**: Never present features as "free wins". Quantify the price of constraints (e.g., monotonic constraints prevent unfair credit denial, but may reduce raw PR-AUC by 1–3%).
-- **Native Categoricals vs. OHE**: Benchmark partition-based categorical splits against One-Hot Encoding and Target Encoding.
+- **Native Categoricals vs. OHE**: Benchmark partition-based categorical splits against One-Hot Encoding and Target Encoding across cardinality spectra ($10^1$ to $10^5$).
 - **Multi-Output Architectures**: Compare Softmax, One-vs-Rest, and Native Vector Trees in terms of gradient memory, split gain formulation, and tree count reduction ($K\times$).
-- **Regulatory Governance Memos**: Provide real-world compliance documentation (e.g., Federal Reserve SR 11-7 model risk memos, TreeSHAP collinearity handling).
+- **Algorithmic Fairness & Disparate Impact Auditing**: Quantify demographic parity, the Four-Fifths (80%) Rule under ECOA Reg B / Title VII, Kleinberg's Impossibility Theorem, and Hardt Equalized Odds post-processing mitigation.
+- **Regulatory Governance Memos**: Provide real-world compliance documentation (e.g., Federal Reserve SR 11-7 model risk memos, TreeSHAP collinearity handling, and adverse action attribution).
 
-### Module 05: Production Engineering, Calibration & Quirks
+### Module 05: Production Engineering, Calibration & Conformal Risk
 - **Ultra-Low Latency Inference**: Benchmark standard Python predict against ONNX Runtime, Treelite, or C-API runtimes; enforce numerical parity assertions ($< 10^{-4}$).
-- **Probability Calibration**: Include calibration curves, Expected Calibration Error (ECE), and compare Platt Scaling (Logistic Regression) vs. Isotonic Regression on imbalanced predictions.
+- **Classical Probability Calibration**: Include calibration curves, Expected Calibration Error (ECE), and compare Platt Scaling (Logistic Regression) vs. Isotonic Regression vs. Beta Calibration on imbalanced predictions.
+- **Distribution-Free Uncertainty Guarantees (Conformal Prediction)**:
+  - Implement Split Conformal Prediction guaranteeing finite-sample marginal coverage: $P(Y \in \hat{C}(X)) \ge 1 - \alpha$.
+  - **Institutional Tripartite Underwriting Triage**: Partition predictions into **Automated Approvals** ($\hat{C}=\{0\}$), **Automated Rejections** ($\hat{C}=\{1\}$), and **Uncertain Tripartite Escalations** ($\hat{C}=\{0, 1\}$) routed to senior human underwriters.
+  - **Conformalized Quantile Regression (CQR)**: Fit asymmetric pinball loss quantile trees regularized by conformal calibration intervals on heteroskedastic distributions.
+  - **Mondrian Group-Conditional Conformal Auditing**: Audit sub-population conditional coverage across protected demographic or regional strata to prevent uncalibrated risk pooling.
 - **Model Drift Monitoring**: Implement Population Stability Index (PSI) and distribution drift monitoring (e.g., Evidently AI / Wasserstein distance).
-- **Production Retraining Policies**: Include a documented Champion/Challenger governance framework covering shadow deployments, trigger thresholds, and rollback criteria.
+- **Production Retraining Policies**: Include a documented Champion/Challenger governance framework covering shadow deployments, trigger thresholds, and automated rollback criteria.
 
 ### Module 06: Capstone Domain Projects
 - **Domain-Anchored Reality**: Select a core domain (e.g., Finance, AdTech, Healthcare) to anchor the applied projects.
 - **Key Real-World Scenarios**:
-  1. *Time-Series / Forecasting*: Walk-forward validation without lookahead leakage.
-  2. *Extreme Class Imbalance*: Fraud detection (0.1% positive rate), PR-AUC optimization, threshold tuning.
-  3. *Regulated Credit Scoring*: Scorecard scaling, monotonic constraints, adverse action explainability.
-  4. *Survival Analysis*: Right-censored cohorts, Accelerated Failure Time (AFT), concordance index.
+  1. *Time-Series / Forecasting*: Walk-forward cross-validation without lookahead leakage, regime-shift handling.
+  2. *Extreme Class Imbalance*: Fraud detection (0.1% positive rate), PR-AUC optimization, cost-matrix threshold tuning.
+  3. *Regulated Credit Scoring*: Scorecard scaling ($PDO / BaseOdds$), monotonic constraints, adverse action code extraction.
+  4. *Survival Analysis*: Right-censored cohorts, Accelerated Failure Time (AFT), concordance index ($C$-index).
+  5. *Causal Uplift & Heterogeneous Treatment Effects (CATE)*:
+     - Distinguish predictive propensity $P(Y=1|X)$ from causal counterfactual lift $\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X]$.
+     - The Meta-Learner hierarchy: Compare S-Learner (zero-uplift regularization penalty), T-Learner (sample-size imbalance penalty), and **X-Learner** (imputed counterfactual cross-learning with propensity weighting $e(x)$).
+     - **Closed-Form Net Expected Value (NEV) Policy Optimizer**: Optimize budget allocation via $h^*(x) = \mathbb{I}\left(V \cdot \hat{\tau}(x) - C > 0\right)$ constrained by budget $B$, sorting by unit return $\hat{\tau}(x) / c(x)$.
+     - Model evaluation via Qini curves, AUUC (Area Under Uplift Curve), and cumulative incremental gain.
 
 ### Module 07: Distributed Architecture & Scaling
 - **Network Topology**: Diagram and explain the distributed communication topology (e.g., Rabit Ring AllReduce $\mathcal{O}(K \cdot N)$ vs. legacy Parameter Server bottlenecks).
@@ -132,7 +145,32 @@ graph TD
 
 ---
 
-## 🛡️ 4. Data Hygiene & Zero-Dependency Strategy
+## 📖 4. The Enterprise Study Guide Exporter Standard
+
+To bridge static Markdown documentation with high-stakes executive and research dissemination, every algorithm repository must include a dedicated compilation script (`export_study_guide_pdf.py`) adhering to these standards:
+
+1. **LaTeX Math Pre-Processing Engine**:
+   - Markdown parsers routinely corrupt LaTeX math syntax by escaping underscores (`_`), asterisks (`*`), and backslashes (`\`).
+   - The exporter must isolate display math (`$$...$$`) and inline math (`$...$`) via regex, replace them with unique placeholder UUID tokens before Markdown parsing, and inject raw TeX strings back into the HTML stream for pristine client-side MathJax 3 rendering.
+2. **Dual-Theme Pedagogical Design**:
+   - **Developer Dark Mode**: Cyber-slate dark theme (`#080b12` canvas, `#0f172a` cards, `#38bdf8` cyan accents) optimized for high-contrast IDE coding.
+   - **Academic Paper / Monograph Light Mode**: Replicates a prestigious published research paper or university press monograph:
+     - *Archival Canvas*: Warm drafting desk background (`#f4f0e6`) with subtle paper grid lines.
+     - *Ivory Paper Sheet*: Centered publication sheet (`#fdfcf7`) with bookbinding elevation and soft deckle borders (`#ded7c6`).
+     - *Printer's Ink Typography*: Deep carbon ink (`#121826`) and warm charcoal body text (`#2b2824`) using **Newsreader** (Google Font editorial serif) with $1.84$ line-height.
+     - *IEEE/Chicago Publication Tables*: Formal top and bottom $2.5\text{px}$ book rules, horizontal header dividers, and zero vertical borders.
+     - *TeX Display Insets*: Display equations rendered inside warm parchment cards (`#faf7ee`) with fine ink borders.
+     - *Theorem & Remark Pull-Quotes*: Classical italicized monograph epigraphs with Oxford blue rules (`#0f4c81`).
+     - *Knuth Code Notation*: Inline code rendered on warm cream chips with archival rust red ink (`#8c281f`).
+3. **Client-Side Usability**:
+   - Reading progress indicator ($0-100\%$).
+   - Real-time sidebar filter (`Ctrl+K`) with automatic section header hiding.
+   - Zero-dependency local execution with `localStorage` theme preference persistence.
+   - Pristine `@media print` rules ensuring clean, page-break-aware PDF export via standard browser print (`Ctrl+P`).
+
+---
+
+## 🛡️ 5. Data Hygiene & Zero-Dependency Strategy
 
 To guarantee that any user or CI runner can execute the full curriculum without external cloud credentials or broken downloads, every algorithm curriculum must follow a **Dual-Path Data Strategy**:
 
@@ -141,10 +179,20 @@ To guarantee that any user or CI runner can execute the full curriculum without 
 
 ---
 
-## ⚡ 5. Quality Assurance & CI Guardrails
+## ⚡ 6. Quality Assurance & Automated Testing Contracts
 
-Every study guide repository must enforce the following automated controls:
+Every study guide repository must enforce deterministic quality contracts across unit tests and CI workflows:
 
+### A. Quantitative Numerical Parity Contract
+| Component | Baseline Reference | Verification Target | Permissible Error Threshold |
+|:---|:---|:---|:---|
+| **Tree Split Scores** | Scratch NumPy Engine | Official Library C++ Core | $\text{MAE} < 10^{-7}$ (Floating-point precision) |
+| **Quantile Sketching** | Approximate Sketch Engine | Exact Rank Sorting | Rank error $\epsilon \le 0.05$ |
+| **Inference Serving** | Native Library Predict | ONNX Runtime Engine | $\text{Max Absolute Error} < 10^{-4}$ |
+| **Probability Calibration** | Uncalibrated Logits | Platt / Isotonic Post-hoc | Brier Score reduction $> 15\%$ on skewed test |
+| **Conformal Coverage** | Finite Calibration Set ($n$) | Empirical Test Set Coverage | $1 - \alpha \le \text{Coverage} \le 1 - \alpha + \mathcal{O}(1/n)$ |
+
+### B. CI Guardrails & Automated Test Suite
 1. **Continuous Integration Matrix**: Test across multiple active Python minor versions (e.g., `["3.10", "3.11", "3.12"]`).
 2. **Automated Linting**: Global fast linting via `ruff check .`.
 3. **Repository File-Size Guard**: An automated CI step that inspects `git ls-files` and fails if any tracked file exceeds 10MB, strictly preventing accidental data or large model commits:
@@ -158,5 +206,34 @@ Every study guide repository must enforce the following automated controls:
            sys.exit(1)
    "
    ```
-4. **Comprehensive Test Suite**: Automated pytest suite verifying scratch mathematical parity, ONNX runtime parity, multi-output shapes, reproducibility, and distributed interfaces.
+4. **Notebook Execution Verification**: Execute all curriculum Jupyter notebooks via `pytest --nbmake` to ensure zero broken cells or unhandled deprecations in the interactive labs.
+5. **Deterministic Testing**: Verify test fixtures with explicit random seeds (`seed=42`) across synthetic data generation, Optuna pruning, and distributed pipeline mocks.
+
+---
+
+## 📊 7. Cross-Algorithm Comparative Benchmark Framework
+
+When building a curriculum for any specific tree-based model (e.g., LightGBM, CatBoost), the repository must include a canonical comparative analysis evaluating the algorithm along these primary structural axes:
+
+```mermaid
+graph LR
+    A["Algorithm Architectural Profile"] --> B["Split Strategy"]
+    A --> C["Tree Growth Policy"]
+    A --> D["Categorical Encoding"]
+    A --> E["Sparsity & Memory Layout"]
+    
+    B --> B1["Exact Greedy vs. Histogram vs. GOSS vs. MVS"]
+    C --> C1["Depth-Wise (Level) vs. Leaf-Wise (Best-First) vs. Oblivious (Symmetric)"]
+    D --> D1["One-Hot vs. Fisher Exact Partition vs. Ordered Target Statistics"]
+    E --> E1["CSR / CSC vs. Exclusive Feature Bundling (EFB) vs. Bit-Packed Bins"]
+```
+
+| Architectural Dimension | XGBoost | LightGBM | CatBoost |
+|:---|:---|:---|:---|
+| **Default Split Strategy** | Histogram (`tree_method='hist'`) / Weighted Sketch | Gradient-based One-Side Sampling (GOSS) + Histogram | Minimum Variance Sampling (MVS) / Binned Histograms |
+| **Tree Growth Policy** | Depth-wise (level-by-level with `max_depth`) | Leaf-wise (best-first with `num_leaves`) | Oblivious / Symmetric trees (balanced depth indexing) |
+| **Categorical Support** | Partition-based experimental categorical splits | Optimal Fisher histogram sorting ($\mathcal{O}(K \log K)$) | On-the-fly Ordered Target Statistics + Permutation combinations |
+| **Hardware & Memory** | DMatrix / Compressed column blocks / Quantile DMatrix | Exclusive Feature Bundling (EFB) / Shared integer bins | Dense binary quantization / Fast SIMD GPU evaluation |
+| **Missing Values** | Default direction routed via split gain maximization | Default bin allocation to separate missing bin | Separate dedicated bin (`Min` or `Max`) |
+
 

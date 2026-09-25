@@ -27,10 +27,13 @@ To cement your authority on XGBoost, you will apply the theory and mechanics to 
   - [Leading Indian Bank and CIBIL Real World Dataset](https://www.kaggle.com/datasets/saurabhbadole/leading-indian-bank-and-cibil-real-world-dataset)
 - **Focus**: Monotonic constraints (e.g., higher income should strictly decrease default probability) and handling high-cardinality categorical features.
 
-## Project 4: Marketing Propensity
-- **Goal**: Predict whether a customer will subscribe to a term deposit or respond to a marketing campaign.
-- **Data Source**: [Banking Dataset - Marketing Targets](https://www.kaggle.com/datasets/prakharrathi25/banking-dataset-marketing-targets)
-- **Focus**: Maximizing recall/precision tradeoffs for business ROI, identifying key drivers of customer conversion using SHAP.
+## Project 4: Marketing Propensity & Causal Uplift Decisioning
+- **Goal**: Move beyond standard response propensity $P(Y=1 \mid X)$ to estimate Conditional Average Treatment Effects $\tau(X)$ and optimize capital allocation for retail banking campaigns.
+- **Data Source**: Deterministic synthetic continuous CATE cohort (`scripts/generate_synthetic_data.py --dataset uplift`) and [Banking Dataset - Marketing Targets](https://www.kaggle.com/datasets/prakharrathi25/banking-dataset-marketing-targets).
+- **Deliverables**:
+  - [`marketing_propensity.ipynb`](./04_marketing_propensity/marketing_propensity.ipynb): Classical predictive propensity modeling with Optuna Bayesian profit maximization.
+  - [`causal_uplift_engine.py`](./04_marketing_propensity/causal_uplift_engine.py): Standalone production causal ML engine implementing S-Learner, T-Learner, and cross-fitted X-Learner (Künzel et al. PNAS 2019), Qini curves, AUUC, bootstrap permutation tests, and budget-constrained argmax policy optimization.
+  - [`uplift_modeling.ipynb`](./04_marketing_propensity/uplift_modeling.ipynb): Interactive lab demonstrating the "Sure Things" / "Sleeping Dogs" propensity trap, Unconfoundedness identification assumption & hidden confounder audits, TreeSHAP model attribution caveats under SR 11-7, and campaign profit frontier optimization (+20% to +40% net dollar gain).
 
 ## Project 5: Massive Data Scaling
 - **Goal**: Push the limits of a single machine or practice distributed computing on a massive dataset.

@@ -25,13 +25,19 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (function() {{
+            const saved = localStorage.getItem('study_guide_theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        }})();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} — Enterprise Masterclass</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- MathJax for Mathematical LaTeX Equations -->
     <script>
@@ -55,34 +61,56 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             --bg-surface: #0f172a;
             --bg-card: rgba(15, 23, 42, 0.75);
             --bg-hover: #1e293b;
+            --navbar-bg: rgba(15, 23, 42, 0.85);
             --border-color: rgba(255, 255, 255, 0.08);
             --border-hover: rgba(56, 189, 248, 0.3);
             --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+            --text-secondary: #cbd5e1;
             --text-muted: #64748b;
+            --code-inline-bg: rgba(56, 189, 248, 0.1);
+            --code-inline-color: #38bdf8;
+            --code-inline-border: rgba(56, 189, 248, 0.2);
             --cyan-accent: #38bdf8;
             --indigo-accent: #818cf8;
             --emerald-accent: #34d399;
             --amber-accent: #fbbf24;
             --rose-accent: #f43f5e;
+            --table-th-bg: #1e293b;
+            --blockquote-bg: rgba(30, 41, 59, 0.5);
+            --math-bg: #0d121f;
+            --hero-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.6));
+            --hero-title-color: linear-gradient(135deg, #ffffff 40%, #38bdf8 100%);
+            --hero-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
             --sidebar-width: 320px;
         }}
 
         [data-theme="light"] {{
-            --bg-base: #f8fafc;
-            --bg-surface: #ffffff;
-            --bg-card: rgba(255, 255, 255, 0.9);
-            --bg-hover: #f1f5f9;
-            --border-color: #e2e8f0;
-            --border-hover: #0284c7;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --cyan-accent: #0284c7;
-            --indigo-accent: #4f46e5;
-            --emerald-accent: #059669;
-            --amber-accent: #d97706;
-            --rose-accent: #e11d48;
+            --bg-base: #f4f0e6;             /* Warm drafting desk / book canvas */
+            --bg-surface: #fdfcf7;          /* High-grade ivory archival publication paper */
+            --bg-card: #f8f5ec;             /* Subtle warm inset card */
+            --bg-hover: #ede7d8;            /* Warm parchment hover */
+            --navbar-bg: rgba(253, 252, 247, 0.95);
+            --border-color: #e2dcd0;        /* Fine bookbinding rule */
+            --border-hover: #0f4c81;
+            --text-primary: #121826;        /* Deep carbon printer's ink black */
+            --text-secondary: #2b2824;      /* Editorial reading ink (warm charcoal) */
+            --text-muted: #6e675f;          /* Graphite secondary annotation */
+            --code-inline-bg: #f2ede0;      /* Warm cream chip */
+            --code-inline-color: #8c281f;   /* Classic archival rust notation */
+            --code-inline-border: #ded7c6;
+            --cyan-accent: #0f4c81;         /* Oxford scholar blue */
+            --indigo-accent: #1e3a8a;       /* Deep monograph navy */
+            --emerald-accent: #14532d;      /* Deep forest green */
+            --amber-accent: #92400e;        /* Dark warm amber */
+            --rose-accent: #991b1b;         /* Crimson editorial mark */
+            --table-th-bg: #f5f0e4;
+            --blockquote-bg: #f7f3ea;
+            --math-bg: #faf7ee;
+            --hero-bg: #fbf9f2;
+            --hero-title-color: #121826;
+            --hero-border: #ded7c6;
+            --card-shadow: 0 1px 3px rgba(40, 30, 20, 0.04), 0 8px 24px -4px rgba(40, 30, 20, 0.06);
         }}
 
         * {{
@@ -104,6 +132,12 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             background-attachment: fixed;
         }}
 
+        [data-theme="light"] body {{
+            background-image:
+                radial-gradient(circle at 15% 10%, rgba(2, 132, 199, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 60%, rgba(79, 70, 229, 0.03) 0%, transparent 40%);
+        }}
+
         /* Reading Progress Bar */
         #progress-bar {{
             position: fixed;
@@ -123,7 +157,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             left: 0;
             right: 0;
             height: 64px;
-            background: rgba(15, 23, 42, 0.85);
+            background: var(--navbar-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-color);
@@ -132,6 +166,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             justify-content: space-between;
             padding: 0 28px;
             z-index: 1000;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
         }}
 
         .nav-brand {{
@@ -146,8 +181,8 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
         }}
 
         .brand-badge {{
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.2));
-            border: 1px solid rgba(56, 189, 248, 0.4);
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
             color: var(--cyan-accent);
             font-size: 11px;
             font-weight: 700;
@@ -155,6 +190,12 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             letter-spacing: 0.08em;
             padding: 3px 8px;
             border-radius: 6px;
+        }}
+
+        [data-theme="light"] .brand-badge {{
+            background: rgba(2, 132, 199, 0.1);
+            border-color: rgba(2, 132, 199, 0.25);
+            color: #0284c7;
         }}
 
         .nav-actions {{
@@ -313,14 +354,14 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
 
         /* Hero Executive Dashboard */
         .hero-banner {{
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.6));
-            border: 1px solid var(--border-color);
+            background: var(--hero-bg);
+            border: 1px solid var(--hero-border);
             border-radius: 16px;
             padding: 36px 40px;
             margin-bottom: 40px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--card-shadow);
         }}
 
         .hero-banner::after {{
@@ -334,12 +375,16 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             pointer-events: none;
         }}
 
+        [data-theme="light"] .hero-banner::after {{
+            background: radial-gradient(circle at top right, rgba(2, 132, 199, 0.08), transparent 70%);
+        }}
+
         .hero-title {{
             font-family: 'Outfit', sans-serif;
             font-size: 34px;
             font-weight: 800;
             letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #ffffff 40%, var(--cyan-accent) 100%);
+            background: var(--hero-title-color);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 12px;
@@ -367,6 +412,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             padding: 14px 18px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }}
 
         .stat-value {{
@@ -397,7 +443,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             font-family: 'Outfit', sans-serif;
             letter-spacing: -0.02em;
             font-weight: 700;
-            color: #ffffff;
+            color: var(--text-primary);
             scroll-margin-top: 80px;
         }}
 
@@ -407,6 +453,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
         }}
 
         .markdown-body h2 {{
@@ -414,7 +461,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             margin-top: 40px;
             margin-bottom: 16px;
             padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid var(--border-color);
             color: var(--cyan-accent);
         }}
 
@@ -422,7 +469,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             font-size: 18px;
             margin-top: 28px;
             margin-bottom: 12px;
-            color: #e2e8f0;
+            color: var(--text-primary);
         }}
 
         .markdown-body h4 {{
@@ -434,25 +481,33 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
 
         .markdown-body p {{
             margin-bottom: 16px;
-            color: #cbd5e1;
+            color: var(--text-secondary);
+            font-size: 15.5px;
+            line-height: 1.75;
+        }}
+
+        .markdown-body strong, .markdown-body b {{
+            color: var(--text-primary);
+            font-weight: 600;
         }}
 
         .markdown-body a {{
             color: var(--cyan-accent);
             text-decoration: none;
-            border-bottom: 1px dashed rgba(56, 189, 248, 0.4);
+            border-bottom: 1px dashed var(--cyan-accent);
             transition: all 0.15s;
         }}
 
         .markdown-body a:hover {{
-            color: #7dd3fc;
+            color: var(--indigo-accent);
             border-bottom-style: solid;
         }}
 
         .markdown-body ul, .markdown-body ol {{
             margin-bottom: 18px;
             padding-left: 24px;
-            color: #cbd5e1;
+            color: var(--text-secondary);
+            line-height: 1.75;
         }}
 
         .markdown-body li {{
@@ -466,7 +521,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             margin: 28px auto;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             background-color: var(--bg-surface);
             object-fit: contain;
         }}
@@ -478,51 +533,53 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             margin: 40px 0;
         }}
 
-        /* Code Blocks & Copy Button */
+        /* Code Blocks & Copy Button - Always Dark High-Contrast Terminal */
         .code-container {{
             position: relative;
-            margin: 20px 0;
+            margin: 22px 0;
             border-radius: 12px;
             overflow: hidden;
-            border: 1px solid var(--border-color);
+            border: 1px solid #30363d;
             background: #0d1117;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
         }}
 
         .code-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(22, 27, 34, 0.9);
+            background: #161b22;
             padding: 8px 16px;
             font-size: 12px;
-            color: var(--text-muted);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #8b949e;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             font-family: 'Fira Code', monospace;
         }}
 
         .code-header .lang-badge {{
             text-transform: uppercase;
-            font-weight: 600;
-            color: var(--cyan-accent);
+            font-weight: 700;
+            color: #58a6ff;
+            font-size: 11px;
+            letter-spacing: 0.05em;
         }}
 
         .copy-btn {{
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
+            background: rgba(240, 246, 252, 0.08);
+            border: 1px solid rgba(240, 246, 252, 0.15);
+            color: #c9d1d9;
             font-size: 11px;
             font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 5px;
             cursor: pointer;
             transition: all 0.2s;
         }}
 
         .copy-btn:hover {{
-            background: var(--bg-hover);
-            color: var(--cyan-accent);
-            border-color: var(--cyan-accent);
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+            border-color: #58a6ff;
         }}
 
         .markdown-body pre {{
@@ -533,40 +590,45 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             font-size: 13.5px;
             line-height: 1.6;
             background: #0d1117 !important;
-            color: #e6edf3;
+            color: #e6edf3 !important;
         }}
 
         .markdown-body code {{
             font-family: 'Fira Code', monospace;
-            font-size: 0.9em;
-            background: rgba(255, 255, 255, 0.08);
+            font-size: 0.88em;
+            background: var(--code-inline-bg);
+            border: 1px solid var(--code-inline-border);
             padding: 2px 6px;
-            border-radius: 4px;
-            color: #38bdf8;
+            border-radius: 5px;
+            color: var(--code-inline-color);
+            font-weight: 500;
         }}
 
         .markdown-body pre code {{
-            background: transparent;
-            padding: 0;
-            color: inherit;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            color: inherit !important;
         }}
 
         /* Tables */
         .markdown-body table {{
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin: 24px 0;
             font-size: 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             border: 1px solid var(--border-color);
             background: var(--bg-surface);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }}
 
         .markdown-body th {{
-            background: rgba(30, 41, 59, 0.8);
-            color: #ffffff;
-            font-weight: 600;
+            background: var(--table-th-bg);
+            color: var(--text-primary);
+            font-weight: 700;
             text-align: left;
             padding: 12px 16px;
             border-bottom: 2px solid var(--border-color);
@@ -575,7 +637,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
         .markdown-body td {{
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
-            color: #cbd5e1;
+            color: var(--text-secondary);
         }}
 
         .markdown-body tr:last-child td {{
@@ -588,17 +650,34 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
 
         /* Blockquotes as Callout Alerts */
         .markdown-body blockquote {{
-            margin: 20px 0;
-            padding: 16px 20px;
-            background: rgba(30, 41, 59, 0.4);
+            margin: 22px 0;
+            padding: 16px 22px;
+            background: var(--blockquote-bg);
             border-left: 4px solid var(--cyan-accent);
-            border-radius: 0 8px 8px 0;
-            color: #e2e8f0;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 0 10px 10px 0;
+            color: var(--text-secondary);
+            font-style: normal;
         }}
 
-        /* Math Equations Card */
-        .MathJax_Display, .mjx-chtml {{
-            padding: 14px 0;
+        .markdown-body blockquote p:last-child {{
+            margin-bottom: 0;
+        }}
+
+        /* Math Equations Display */
+        .MathJax, .mjx-chtml, .MathJax_Display {{
+            color: var(--text-primary) !important;
+        }}
+
+        .MathJax_Display {{
+            padding: 16px 20px !important;
+            margin: 20px 0 !important;
+            background: var(--math-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             overflow-x: auto;
             overflow-y: hidden;
         }}
@@ -606,12 +685,298 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
         /* Mermaid Diagrams Container */
         .mermaid {{
             margin: 24px 0;
-            padding: 20px;
+            padding: 24px;
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             display: flex;
             justify-content: center;
+        }}
+
+        /* ======================================================== */
+        /* ACADEMIC PAPER MONOGRAPH AESTHETIC (LIGHT THEME)         */
+        /* ======================================================== */
+        [data-theme="light"] body {{
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            background-image:
+                linear-gradient(rgba(18, 24, 38, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 24, 38, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }}
+
+        [data-theme="light"] .top-navbar {{
+            background: rgba(253, 252, 247, 0.95);
+            border-bottom: 1px solid #ded8cb;
+            box-shadow: 0 1px 4px rgba(40, 30, 20, 0.04);
+        }}
+
+        [data-theme="light"] .nav-brand {{
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: #121826;
+            letter-spacing: -0.01em;
+        }}
+
+        [data-theme="light"] .brand-badge {{
+            background: #f0ebe0;
+            border: 1px solid #ded7c6;
+            color: #0f4c81;
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+        }}
+
+        [data-theme="light"] .portal-sidebar {{
+            background: #faf7f0;
+            border-right: 1px solid #e2dcd0;
+        }}
+
+        [data-theme="light"] .sidebar-search input {{
+            background: #fdfcf7;
+            border: 1px solid #ded7c6;
+            color: #121826;
+        }}
+
+        [data-theme="light"] .nav-section-title {{
+            color: #78716a;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.12em;
+        }}
+
+        [data-theme="light"] .nav-item a {{
+            color: #4b4640;
+            font-family: 'Inter', sans-serif;
+            font-size: 13.5px;
+        }}
+
+        [data-theme="light"] .nav-item a:hover {{
+            background: #f0ebe0;
+            color: #0f4c81;
+        }}
+
+        [data-theme="light"] .nav-item a.active {{
+            background: #eae4d6;
+            color: #0f4c81;
+            border-left: 3px solid #0f4c81;
+            font-weight: 600;
+        }}
+
+        /* Paper sheet monograph container */
+        [data-theme="light"] .portal-main {{
+            background: var(--bg-surface);
+            max-width: 1060px;
+            margin: 32px auto 60px;
+            padding: 56px 76px 110px;
+            border-radius: 4px;
+            border: 1px solid #ded7c6;
+            box-shadow:
+                0 1px 3px rgba(40, 30, 20, 0.04),
+                0 12px 36px -4px rgba(40, 30, 20, 0.08);
+        }}
+
+        [data-theme="light"] .hero-banner {{
+            background: #fbf9f2;
+            border: 1px solid #ded7c6;
+            border-top: 4px solid #0f4c81;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(40, 30, 20, 0.03);
+            padding: 36px 42px;
+        }}
+
+        [data-theme="light"] .hero-banner::after {{
+            display: none;
+        }}
+
+        [data-theme="light"] .hero-title {{
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-size: 35px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            background: none;
+            -webkit-text-fill-color: #121826;
+            color: #121826;
+        }}
+
+        [data-theme="light"] .hero-subtitle {{
+            font-family: 'Inter', sans-serif;
+            color: #4b4640;
+            font-size: 15px;
+            line-height: 1.65;
+        }}
+
+        [data-theme="light"] .stat-card {{
+            background: #fdfcf7;
+            border: 1px solid #e3ded2;
+            border-radius: 4px;
+            box-shadow: none;
+        }}
+
+        [data-theme="light"] .stat-value {{
+            color: #0f4c81;
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-weight: 700;
+            font-size: 26px;
+        }}
+
+        /* Publication Typography */
+        [data-theme="light"] .markdown-body {{
+            font-family: 'Newsreader', 'Charter', 'Georgia', serif;
+            font-size: 16.5px;
+            line-height: 1.84;
+            color: var(--text-secondary);
+        }}
+
+        [data-theme="light"] .markdown-body h1,
+        [data-theme="light"] .markdown-body h2,
+        [data-theme="light"] .markdown-body h3,
+        [data-theme="light"] .markdown-body h4 {{
+            font-family: 'Newsreader', 'Georgia', serif;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }}
+
+        [data-theme="light"] .markdown-body h1 {{
+            font-size: 32px;
+            font-weight: 700;
+            border-bottom: 2px solid #121826;
+            padding-bottom: 14px;
+            margin-top: 56px;
+            margin-bottom: 22px;
+        }}
+
+        [data-theme="light"] .markdown-body h2 {{
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f4c81;
+            border-bottom: 1px solid #ded7c6;
+            padding-bottom: 8px;
+            margin-top: 44px;
+            margin-bottom: 18px;
+        }}
+
+        [data-theme="light"] .markdown-body h3 {{
+            font-size: 19.5px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 32px;
+            margin-bottom: 14px;
+        }}
+
+        [data-theme="light"] .markdown-body h4 {{
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f4c81;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }}
+
+        [data-theme="light"] .markdown-body p {{
+            color: #2b2824;
+            margin-bottom: 18px;
+        }}
+
+        [data-theme="light"] .markdown-body strong,
+        [data-theme="light"] .markdown-body b {{
+            color: #121826;
+            font-weight: 700;
+        }}
+
+        [data-theme="light"] .markdown-body ul,
+        [data-theme="light"] .markdown-body ol {{
+            color: #2b2824;
+            line-height: 1.82;
+            margin-bottom: 20px;
+        }}
+
+        [data-theme="light"] .markdown-body a {{
+            color: #0f4c81;
+            border-bottom: 1px solid #0f4c81;
+        }}
+
+        [data-theme="light"] .markdown-body a:hover {{
+            color: #1e3a8a;
+            border-bottom: 1.5px solid #1e3a8a;
+        }}
+
+        /* Formal Academic Table (IEEE / Nature / Chicago Manual format) */
+        [data-theme="light"] .markdown-body table {{
+            border-top: 2.5px solid #121826;
+            border-bottom: 2.5px solid #121826;
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            margin: 28px 0;
+        }}
+
+        [data-theme="light"] .markdown-body th {{
+            border-bottom: 1.5px solid #121826;
+            background: #f7f3e8;
+            color: #121826;
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.02em;
+            padding: 10px 14px;
+        }}
+
+        [data-theme="light"] .markdown-body td {{
+            border-bottom: 1px solid #e7e1d4;
+            color: #2b2824;
+            font-size: 14.5px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            padding: 11px 14px;
+        }}
+
+        [data-theme="light"] .markdown-body tr:hover td {{
+            background: #f7f4ea;
+        }}
+
+        /* Academic Theorem / Pull-quote Callout */
+        [data-theme="light"] .markdown-body blockquote {{
+            background: #f8f5ed;
+            border-left: 3.5px solid #0f4c81;
+            border-top: 1px solid #e8e2d4;
+            border-right: 1px solid #e8e2d4;
+            border-bottom: 1px solid #e8e2d4;
+            border-radius: 0 4px 4px 0;
+            color: #38342e;
+            font-style: italic;
+            padding: 18px 24px;
+            margin: 24px 0;
+        }}
+
+        /* TeX / MathJax Display Paper Inset */
+        [data-theme="light"] .MathJax,
+        [data-theme="light"] .mjx-chtml,
+        [data-theme="light"] .MathJax_Display {{
+            color: #121826 !important;
+        }}
+
+        [data-theme="light"] .MathJax_Display {{
+            background: #faf7ee;
+            border: 1px solid #e2dbcd;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 2px rgba(40, 30, 20, 0.03);
+            padding: 20px 24px !important;
+            margin: 24px 0 !important;
+        }}
+
+        /* Monograph Code Containers */
+        [data-theme="light"] .code-container {{
+            border: 1px solid #333a42;
+            box-shadow: 0 4px 16px rgba(40, 30, 20, 0.12);
+            border-radius: 6px;
+        }}
+
+        [data-theme="light"] .markdown-body code {{
+            background: #f2ede0;
+            border: 1px solid #ded7c6;
+            color: #8c281f;
+            font-weight: 600;
         }}
 
         /* Print Optimization */
@@ -710,11 +1075,24 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
 
             <div class="nav-section-title">Core Engine Quicklinks</div>
             <ul class="nav-links">
-                <li class="nav-item"><a href="#1-paper-reading-roadmap">Paper Reading Roadmap</a></li>
+                <li class="nav-item"><a href="#1-theoretical-architecture-formulation-chen-guestrin-2016">Theoretical Pillars & Formulation</a></li>
                 <li class="nav-item"><a href="#2-newton-raphson-intuition-why-the-hessian-matters">Newton Intuition (Curvature)</a></li>
-                <li class="nav-item"><a href="#3-complete-mathematical-derivation-of-objective--gain">Mathematical Derivations</a></li>
-                <li class="nav-item"><a href="#7-the-4-core-diagnostic-questions-self-check">4 Diagnostic Questions</a></li>
-                <li class="nav-item"><a href="#8-code-deliverables--c-parity-validation">Scratch Engine & Parity</a></li>
+                <li class="nav-item"><a href="#3-complete-mathematical-derivation-of-objective-gain">Mathematical Derivations</a></li>
+                <li class="nav-item"><a href="#4-complete-worked-numerical-trace-the-pen-and-paper-proof">Worked Numerical Trace</a></li>
+                <li class="nav-item"><a href="#6-the-approximate-split-engine-weighted-quantile-sketch-full-derivation">Weighted Quantile Sketch</a></li>
+                <li class="nav-item"><a href="#7-systems-engineering-architecture-c-kernels">C++ Systems & Kernels</a></li>
+                <li class="nav-item"><a href="#8-the-4-core-diagnostic-questions-self-check">4 Diagnostic Questions</a></li>
+                <li class="nav-item"><a href="#9-code-deliverables-c-parity-validation">Scratch Engine & Parity</a></li>
+            </ul>
+
+            <div class="nav-section-title">Quantitative Risk & Uplift</div>
+            <ul class="nav-links">
+                <li class="nav-item"><a href="#10-conformal-prediction-distribution-free-uncertainty-guarantees">Conformal Risk Calibration</a></li>
+                <li class="nav-item"><a href="#102-institutional-tripartite-underwriting-triage">Tripartite Underwriting Triage</a></li>
+                <li class="nav-item"><a href="#103-conformalized-quantile-regression-cqr-on-heteroskedastic-loss">CQR Heteroskedastic Loss</a></li>
+                <li class="nav-item"><a href="#104-mondrian-group-conditional-conformal-fairness-auditing">Mondrian Fairness Auditing</a></li>
+                <li class="nav-item"><a href="#43-the-meta-learner-hierarchy-for-cate-estimation">Causal Uplift & X-Learner</a></li>
+                <li class="nav-item"><a href="#45-closed-form-net-expected-value-nev-budget-policy-optimization">NEV Budget Policy Optimizer</a></li>
             </ul>
         </aside>
 
@@ -740,7 +1118,7 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
                         <span class="stat-label">C++ Parity Error</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-value">17 / 17</span>
+                        <span class="stat-value">30 / 30</span>
                         <span class="stat-label">Pytest Passed</span>
                     </div>
                 </div>
@@ -763,20 +1141,31 @@ HTML_PORTAL_TEMPLATE = """<!DOCTYPE html>
             document.getElementById('progress-bar').style.width = scrolled + '%';
         }});
 
-        // 2. Theme Toggle
+        // 2. Theme Persistence & Toggle
+        const savedTheme = localStorage.getItem('study_guide_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
         function toggleTheme() {{
             const current = document.documentElement.getAttribute('data-theme');
             const target = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('study_guide_theme', target);
         }}
 
         // 3. Search / TOC Filter
         function filterToc() {{
             const q = document.getElementById('toc-filter').value.toLowerCase();
-            const items = document.querySelectorAll('#sidebar-toc .nav-item');
+            const items = document.querySelectorAll('.portal-sidebar .nav-item');
             items.forEach(item => {{
                 const text = item.textContent.toLowerCase();
                 item.style.display = text.includes(q) ? 'block' : 'none';
+            }});
+            document.querySelectorAll('.portal-sidebar .nav-section-title').forEach(title => {{
+                const list = title.nextElementSibling;
+                if (list && list.classList.contains('nav-links')) {{
+                    const visibleItems = Array.from(list.querySelectorAll('.nav-item')).some(i => i.style.display !== 'none');
+                    title.style.display = visibleItems ? 'block' : 'none';
+                }}
             }});
         }}
 

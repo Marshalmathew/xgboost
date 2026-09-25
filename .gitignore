@@ -194,4 +194,5 @@ data/
 *.joblib
 model.json
 fraud_model.json
-isolation_forest.joblib
+isolation_forest.joblib
+scratch/

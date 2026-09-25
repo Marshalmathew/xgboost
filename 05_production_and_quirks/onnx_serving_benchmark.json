@@ -1,24 +1,24 @@
 {
   "dmatrix": {
-    "mean_us": 1628.99,
-    "p50_us": 1050.55,
-    "p95_us": 1584.76,
-    "p99_us": 2435.94,
-    "throughput_qps": 613.9
+    "mean_us": 1078.59,
+    "p50_us": 978.65,
+    "p95_us": 1656.45,
+    "p99_us": 1803.44,
+    "throughput_qps": 927.1
   },
   "inplace_predict": {
-    "mean_us": 496.34,
-    "p50_us": 476.05,
-    "p95_us": 591.07,
-    "p99_us": 758.1,
-    "throughput_qps": 2014.7
+    "mean_us": 513.81,
+    "p50_us": 486.6,
+    "p95_us": 648.32,
+    "p99_us": 750.68,
+    "throughput_qps": 1946.3
   },
   "onnx_runtime": {
-    "mean_us": 23.6,
-    "p50_us": 22.1,
-    "p95_us": 25.11,
-    "p99_us": 36.01,
-    "throughput_qps": 42372.9
+    "mean_us": 24.48,
+    "p50_us": 22.9,
+    "p95_us": 27.73,
+    "p99_us": 36.77,
+    "throughput_qps": 40854.7
   },
   "max_parity_diff": 1.1920928955078125e-07
 }

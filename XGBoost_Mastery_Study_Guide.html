@@ -2,13 +2,19 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (function() {
+            const saved = localStorage.getItem('study_guide_theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XGBoost Mastery Study Guide — Enterprise Masterclass</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- MathJax for Mathematical LaTeX Equations -->
     <script>
@@ -32,34 +38,56 @@
             --bg-surface: #0f172a;
             --bg-card: rgba(15, 23, 42, 0.75);
             --bg-hover: #1e293b;
+            --navbar-bg: rgba(15, 23, 42, 0.85);
             --border-color: rgba(255, 255, 255, 0.08);
             --border-hover: rgba(56, 189, 248, 0.3);
             --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+            --text-secondary: #cbd5e1;
             --text-muted: #64748b;
+            --code-inline-bg: rgba(56, 189, 248, 0.1);
+            --code-inline-color: #38bdf8;
+            --code-inline-border: rgba(56, 189, 248, 0.2);
             --cyan-accent: #38bdf8;
             --indigo-accent: #818cf8;
             --emerald-accent: #34d399;
             --amber-accent: #fbbf24;
             --rose-accent: #f43f5e;
+            --table-th-bg: #1e293b;
+            --blockquote-bg: rgba(30, 41, 59, 0.5);
+            --math-bg: #0d121f;
+            --hero-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.6));
+            --hero-title-color: linear-gradient(135deg, #ffffff 40%, #38bdf8 100%);
+            --hero-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
             --sidebar-width: 320px;
         }
 
         [data-theme="light"] {
-            --bg-base: #f8fafc;
-            --bg-surface: #ffffff;
-            --bg-card: rgba(255, 255, 255, 0.9);
-            --bg-hover: #f1f5f9;
-            --border-color: #e2e8f0;
-            --border-hover: #0284c7;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --cyan-accent: #0284c7;
-            --indigo-accent: #4f46e5;
-            --emerald-accent: #059669;
-            --amber-accent: #d97706;
-            --rose-accent: #e11d48;
+            --bg-base: #f4f0e6;             /* Warm drafting desk / book canvas */
+            --bg-surface: #fdfcf7;          /* High-grade ivory archival publication paper */
+            --bg-card: #f8f5ec;             /* Subtle warm inset card */
+            --bg-hover: #ede7d8;            /* Warm parchment hover */
+            --navbar-bg: rgba(253, 252, 247, 0.95);
+            --border-color: #e2dcd0;        /* Fine bookbinding rule */
+            --border-hover: #0f4c81;
+            --text-primary: #121826;        /* Deep carbon printer's ink black */
+            --text-secondary: #2b2824;      /* Editorial reading ink (warm charcoal) */
+            --text-muted: #6e675f;          /* Graphite secondary annotation */
+            --code-inline-bg: #f2ede0;      /* Warm cream chip */
+            --code-inline-color: #8c281f;   /* Classic archival rust notation */
+            --code-inline-border: #ded7c6;
+            --cyan-accent: #0f4c81;         /* Oxford scholar blue */
+            --indigo-accent: #1e3a8a;       /* Deep monograph navy */
+            --emerald-accent: #14532d;      /* Deep forest green */
+            --amber-accent: #92400e;        /* Dark warm amber */
+            --rose-accent: #991b1b;         /* Crimson editorial mark */
+            --table-th-bg: #f5f0e4;
+            --blockquote-bg: #f7f3ea;
+            --math-bg: #faf7ee;
+            --hero-bg: #fbf9f2;
+            --hero-title-color: #121826;
+            --hero-border: #ded7c6;
+            --card-shadow: 0 1px 3px rgba(40, 30, 20, 0.04), 0 8px 24px -4px rgba(40, 30, 20, 0.06);
         }
 
         * {
@@ -81,6 +109,12 @@
             background-attachment: fixed;
         }
 
+        [data-theme="light"] body {
+            background-image:
+                radial-gradient(circle at 15% 10%, rgba(2, 132, 199, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 60%, rgba(79, 70, 229, 0.03) 0%, transparent 40%);
+        }
+
         /* Reading Progress Bar */
         #progress-bar {
             position: fixed;
@@ -100,7 +134,7 @@
             left: 0;
             right: 0;
             height: 64px;
-            background: rgba(15, 23, 42, 0.85);
+            background: var(--navbar-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-color);
@@ -109,6 +143,7 @@
             justify-content: space-between;
             padding: 0 28px;
             z-index: 1000;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
         }
 
         .nav-brand {
@@ -123,8 +158,8 @@
         }
 
         .brand-badge {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.2));
-            border: 1px solid rgba(56, 189, 248, 0.4);
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
             color: var(--cyan-accent);
             font-size: 11px;
             font-weight: 700;
@@ -132,6 +167,12 @@
             letter-spacing: 0.08em;
             padding: 3px 8px;
             border-radius: 6px;
+        }
+
+        [data-theme="light"] .brand-badge {
+            background: rgba(2, 132, 199, 0.1);
+            border-color: rgba(2, 132, 199, 0.25);
+            color: #0284c7;
         }
 
         .nav-actions {
@@ -290,14 +331,14 @@
 
         /* Hero Executive Dashboard */
         .hero-banner {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.6));
-            border: 1px solid var(--border-color);
+            background: var(--hero-bg);
+            border: 1px solid var(--hero-border);
             border-radius: 16px;
             padding: 36px 40px;
             margin-bottom: 40px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--card-shadow);
         }
 
         .hero-banner::after {
@@ -311,12 +352,16 @@
             pointer-events: none;
         }
 
+        [data-theme="light"] .hero-banner::after {
+            background: radial-gradient(circle at top right, rgba(2, 132, 199, 0.08), transparent 70%);
+        }
+
         .hero-title {
             font-family: 'Outfit', sans-serif;
             font-size: 34px;
             font-weight: 800;
             letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #ffffff 40%, var(--cyan-accent) 100%);
+            background: var(--hero-title-color);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 12px;
@@ -344,6 +389,7 @@
             padding: 14px 18px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
         .stat-value {
@@ -374,7 +420,7 @@
             font-family: 'Outfit', sans-serif;
             letter-spacing: -0.02em;
             font-weight: 700;
-            color: #ffffff;
+            color: var(--text-primary);
             scroll-margin-top: 80px;
         }
 
@@ -384,6 +430,7 @@
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
 
         .markdown-body h2 {
@@ -391,7 +438,7 @@
             margin-top: 40px;
             margin-bottom: 16px;
             padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid var(--border-color);
             color: var(--cyan-accent);
         }
 
@@ -399,7 +446,7 @@
             font-size: 18px;
             margin-top: 28px;
             margin-bottom: 12px;
-            color: #e2e8f0;
+            color: var(--text-primary);
         }
 
         .markdown-body h4 {
@@ -411,25 +458,33 @@
 
         .markdown-body p {
             margin-bottom: 16px;
-            color: #cbd5e1;
+            color: var(--text-secondary);
+            font-size: 15.5px;
+            line-height: 1.75;
+        }
+
+        .markdown-body strong, .markdown-body b {
+            color: var(--text-primary);
+            font-weight: 600;
         }
 
         .markdown-body a {
             color: var(--cyan-accent);
             text-decoration: none;
-            border-bottom: 1px dashed rgba(56, 189, 248, 0.4);
+            border-bottom: 1px dashed var(--cyan-accent);
             transition: all 0.15s;
         }
 
         .markdown-body a:hover {
-            color: #7dd3fc;
+            color: var(--indigo-accent);
             border-bottom-style: solid;
         }
 
         .markdown-body ul, .markdown-body ol {
             margin-bottom: 18px;
             padding-left: 24px;
-            color: #cbd5e1;
+            color: var(--text-secondary);
+            line-height: 1.75;
         }
 
         .markdown-body li {
@@ -443,7 +498,7 @@
             margin: 28px auto;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             background-color: var(--bg-surface);
             object-fit: contain;
         }
@@ -455,51 +510,53 @@
             margin: 40px 0;
         }
 
-        /* Code Blocks & Copy Button */
+        /* Code Blocks & Copy Button - Always Dark High-Contrast Terminal */
         .code-container {
             position: relative;
-            margin: 20px 0;
+            margin: 22px 0;
             border-radius: 12px;
             overflow: hidden;
-            border: 1px solid var(--border-color);
+            border: 1px solid #30363d;
             background: #0d1117;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
         }
 
         .code-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(22, 27, 34, 0.9);
+            background: #161b22;
             padding: 8px 16px;
             font-size: 12px;
-            color: var(--text-muted);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #8b949e;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             font-family: 'Fira Code', monospace;
         }
 
         .code-header .lang-badge {
             text-transform: uppercase;
-            font-weight: 600;
-            color: var(--cyan-accent);
+            font-weight: 700;
+            color: #58a6ff;
+            font-size: 11px;
+            letter-spacing: 0.05em;
         }
 
         .copy-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
+            background: rgba(240, 246, 252, 0.08);
+            border: 1px solid rgba(240, 246, 252, 0.15);
+            color: #c9d1d9;
             font-size: 11px;
             font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 5px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .copy-btn:hover {
-            background: var(--bg-hover);
-            color: var(--cyan-accent);
-            border-color: var(--cyan-accent);
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+            border-color: #58a6ff;
         }
 
         .markdown-body pre {
@@ -510,40 +567,45 @@
             font-size: 13.5px;
             line-height: 1.6;
             background: #0d1117 !important;
-            color: #e6edf3;
+            color: #e6edf3 !important;
         }
 
         .markdown-body code {
             font-family: 'Fira Code', monospace;
-            font-size: 0.9em;
-            background: rgba(255, 255, 255, 0.08);
+            font-size: 0.88em;
+            background: var(--code-inline-bg);
+            border: 1px solid var(--code-inline-border);
             padding: 2px 6px;
-            border-radius: 4px;
-            color: #38bdf8;
+            border-radius: 5px;
+            color: var(--code-inline-color);
+            font-weight: 500;
         }
 
         .markdown-body pre code {
-            background: transparent;
-            padding: 0;
-            color: inherit;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            color: inherit !important;
         }
 
         /* Tables */
         .markdown-body table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin: 24px 0;
             font-size: 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             border: 1px solid var(--border-color);
             background: var(--bg-surface);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .markdown-body th {
-            background: rgba(30, 41, 59, 0.8);
-            color: #ffffff;
-            font-weight: 600;
+            background: var(--table-th-bg);
+            color: var(--text-primary);
+            font-weight: 700;
             text-align: left;
             padding: 12px 16px;
             border-bottom: 2px solid var(--border-color);
@@ -552,7 +614,7 @@
         .markdown-body td {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
-            color: #cbd5e1;
+            color: var(--text-secondary);
         }
 
         .markdown-body tr:last-child td {
@@ -565,17 +627,34 @@
 
         /* Blockquotes as Callout Alerts */
         .markdown-body blockquote {
-            margin: 20px 0;
-            padding: 16px 20px;
-            background: rgba(30, 41, 59, 0.4);
+            margin: 22px 0;
+            padding: 16px 22px;
+            background: var(--blockquote-bg);
             border-left: 4px solid var(--cyan-accent);
-            border-radius: 0 8px 8px 0;
-            color: #e2e8f0;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 0 10px 10px 0;
+            color: var(--text-secondary);
+            font-style: normal;
         }
 
-        /* Math Equations Card */
-        .MathJax_Display, .mjx-chtml {
-            padding: 14px 0;
+        .markdown-body blockquote p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Math Equations Display */
+        .MathJax, .mjx-chtml, .MathJax_Display {
+            color: var(--text-primary) !important;
+        }
+
+        .MathJax_Display {
+            padding: 16px 20px !important;
+            margin: 20px 0 !important;
+            background: var(--math-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             overflow-x: auto;
             overflow-y: hidden;
         }
@@ -583,12 +662,298 @@
         /* Mermaid Diagrams Container */
         .mermaid {
             margin: 24px 0;
-            padding: 20px;
+            padding: 24px;
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             display: flex;
             justify-content: center;
+        }
+
+        /* ======================================================== */
+        /* ACADEMIC PAPER MONOGRAPH AESTHETIC (LIGHT THEME)         */
+        /* ======================================================== */
+        [data-theme="light"] body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            background-image:
+                linear-gradient(rgba(18, 24, 38, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 24, 38, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        [data-theme="light"] .top-navbar {
+            background: rgba(253, 252, 247, 0.95);
+            border-bottom: 1px solid #ded8cb;
+            box-shadow: 0 1px 4px rgba(40, 30, 20, 0.04);
+        }
+
+        [data-theme="light"] .nav-brand {
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: #121826;
+            letter-spacing: -0.01em;
+        }
+
+        [data-theme="light"] .brand-badge {
+            background: #f0ebe0;
+            border: 1px solid #ded7c6;
+            color: #0f4c81;
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+        }
+
+        [data-theme="light"] .portal-sidebar {
+            background: #faf7f0;
+            border-right: 1px solid #e2dcd0;
+        }
+
+        [data-theme="light"] .sidebar-search input {
+            background: #fdfcf7;
+            border: 1px solid #ded7c6;
+            color: #121826;
+        }
+
+        [data-theme="light"] .nav-section-title {
+            color: #78716a;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.12em;
+        }
+
+        [data-theme="light"] .nav-item a {
+            color: #4b4640;
+            font-family: 'Inter', sans-serif;
+            font-size: 13.5px;
+        }
+
+        [data-theme="light"] .nav-item a:hover {
+            background: #f0ebe0;
+            color: #0f4c81;
+        }
+
+        [data-theme="light"] .nav-item a.active {
+            background: #eae4d6;
+            color: #0f4c81;
+            border-left: 3px solid #0f4c81;
+            font-weight: 600;
+        }
+
+        /* Paper sheet monograph container */
+        [data-theme="light"] .portal-main {
+            background: var(--bg-surface);
+            max-width: 1060px;
+            margin: 32px auto 60px;
+            padding: 56px 76px 110px;
+            border-radius: 4px;
+            border: 1px solid #ded7c6;
+            box-shadow:
+                0 1px 3px rgba(40, 30, 20, 0.04),
+                0 12px 36px -4px rgba(40, 30, 20, 0.08);
+        }
+
+        [data-theme="light"] .hero-banner {
+            background: #fbf9f2;
+            border: 1px solid #ded7c6;
+            border-top: 4px solid #0f4c81;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(40, 30, 20, 0.03);
+            padding: 36px 42px;
+        }
+
+        [data-theme="light"] .hero-banner::after {
+            display: none;
+        }
+
+        [data-theme="light"] .hero-title {
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-size: 35px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            background: none;
+            -webkit-text-fill-color: #121826;
+            color: #121826;
+        }
+
+        [data-theme="light"] .hero-subtitle {
+            font-family: 'Inter', sans-serif;
+            color: #4b4640;
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        [data-theme="light"] .stat-card {
+            background: #fdfcf7;
+            border: 1px solid #e3ded2;
+            border-radius: 4px;
+            box-shadow: none;
+        }
+
+        [data-theme="light"] .stat-value {
+            color: #0f4c81;
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-weight: 700;
+            font-size: 26px;
+        }
+
+        /* Publication Typography */
+        [data-theme="light"] .markdown-body {
+            font-family: 'Newsreader', 'Charter', 'Georgia', serif;
+            font-size: 16.5px;
+            line-height: 1.84;
+            color: var(--text-secondary);
+        }
+
+        [data-theme="light"] .markdown-body h1,
+        [data-theme="light"] .markdown-body h2,
+        [data-theme="light"] .markdown-body h3,
+        [data-theme="light"] .markdown-body h4 {
+            font-family: 'Newsreader', 'Georgia', serif;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }
+
+        [data-theme="light"] .markdown-body h1 {
+            font-size: 32px;
+            font-weight: 700;
+            border-bottom: 2px solid #121826;
+            padding-bottom: 14px;
+            margin-top: 56px;
+            margin-bottom: 22px;
+        }
+
+        [data-theme="light"] .markdown-body h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f4c81;
+            border-bottom: 1px solid #ded7c6;
+            padding-bottom: 8px;
+            margin-top: 44px;
+            margin-bottom: 18px;
+        }
+
+        [data-theme="light"] .markdown-body h3 {
+            font-size: 19.5px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 32px;
+            margin-bottom: 14px;
+        }
+
+        [data-theme="light"] .markdown-body h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f4c81;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        [data-theme="light"] .markdown-body p {
+            color: #2b2824;
+            margin-bottom: 18px;
+        }
+
+        [data-theme="light"] .markdown-body strong,
+        [data-theme="light"] .markdown-body b {
+            color: #121826;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .markdown-body ul,
+        [data-theme="light"] .markdown-body ol {
+            color: #2b2824;
+            line-height: 1.82;
+            margin-bottom: 20px;
+        }
+
+        [data-theme="light"] .markdown-body a {
+            color: #0f4c81;
+            border-bottom: 1px solid #0f4c81;
+        }
+
+        [data-theme="light"] .markdown-body a:hover {
+            color: #1e3a8a;
+            border-bottom: 1.5px solid #1e3a8a;
+        }
+
+        /* Formal Academic Table (IEEE / Nature / Chicago Manual format) */
+        [data-theme="light"] .markdown-body table {
+            border-top: 2.5px solid #121826;
+            border-bottom: 2.5px solid #121826;
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            margin: 28px 0;
+        }
+
+        [data-theme="light"] .markdown-body th {
+            border-bottom: 1.5px solid #121826;
+            background: #f7f3e8;
+            color: #121826;
+            font-family: 'Newsreader', 'Georgia', serif;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.02em;
+            padding: 10px 14px;
+        }
+
+        [data-theme="light"] .markdown-body td {
+            border-bottom: 1px solid #e7e1d4;
+            color: #2b2824;
+            font-size: 14.5px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            padding: 11px 14px;
+        }
+
+        [data-theme="light"] .markdown-body tr:hover td {
+            background: #f7f4ea;
+        }
+
+        /* Academic Theorem / Pull-quote Callout */
+        [data-theme="light"] .markdown-body blockquote {
+            background: #f8f5ed;
+            border-left: 3.5px solid #0f4c81;
+            border-top: 1px solid #e8e2d4;
+            border-right: 1px solid #e8e2d4;
+            border-bottom: 1px solid #e8e2d4;
+            border-radius: 0 4px 4px 0;
+            color: #38342e;
+            font-style: italic;
+            padding: 18px 24px;
+            margin: 24px 0;
+        }
+
+        /* TeX / MathJax Display Paper Inset */
+        [data-theme="light"] .MathJax,
+        [data-theme="light"] .mjx-chtml,
+        [data-theme="light"] .MathJax_Display {
+            color: #121826 !important;
+        }
+
+        [data-theme="light"] .MathJax_Display {
+            background: #faf7ee;
+            border: 1px solid #e2dbcd;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 2px rgba(40, 30, 20, 0.03);
+            padding: 20px 24px !important;
+            margin: 24px 0 !important;
+        }
+
+        /* Monograph Code Containers */
+        [data-theme="light"] .code-container {
+            border: 1px solid #333a42;
+            box-shadow: 0 4px 16px rgba(40, 30, 20, 0.12);
+            border-radius: 6px;
+        }
+
+        [data-theme="light"] .markdown-body code {
+            background: #f2ede0;
+            border: 1px solid #ded7c6;
+            color: #8c281f;
+            font-weight: 600;
         }
 
         /* Print Optimization */
@@ -687,11 +1052,24 @@
 
             <div class="nav-section-title">Core Engine Quicklinks</div>
             <ul class="nav-links">
-                <li class="nav-item"><a href="#1-paper-reading-roadmap">Paper Reading Roadmap</a></li>
+                <li class="nav-item"><a href="#1-theoretical-architecture-formulation-chen-guestrin-2016">Theoretical Pillars & Formulation</a></li>
                 <li class="nav-item"><a href="#2-newton-raphson-intuition-why-the-hessian-matters">Newton Intuition (Curvature)</a></li>
-                <li class="nav-item"><a href="#3-complete-mathematical-derivation-of-objective--gain">Mathematical Derivations</a></li>
-                <li class="nav-item"><a href="#7-the-4-core-diagnostic-questions-self-check">4 Diagnostic Questions</a></li>
-                <li class="nav-item"><a href="#8-code-deliverables--c-parity-validation">Scratch Engine & Parity</a></li>
+                <li class="nav-item"><a href="#3-complete-mathematical-derivation-of-objective-gain">Mathematical Derivations</a></li>
+                <li class="nav-item"><a href="#4-complete-worked-numerical-trace-the-pen-and-paper-proof">Worked Numerical Trace</a></li>
+                <li class="nav-item"><a href="#6-the-approximate-split-engine-weighted-quantile-sketch-full-derivation">Weighted Quantile Sketch</a></li>
+                <li class="nav-item"><a href="#7-systems-engineering-architecture-c-kernels">C++ Systems & Kernels</a></li>
+                <li class="nav-item"><a href="#8-the-4-core-diagnostic-questions-self-check">4 Diagnostic Questions</a></li>
+                <li class="nav-item"><a href="#9-code-deliverables-c-parity-validation">Scratch Engine & Parity</a></li>
+            </ul>
+
+            <div class="nav-section-title">Quantitative Risk & Uplift</div>
+            <ul class="nav-links">
+                <li class="nav-item"><a href="#10-conformal-prediction-distribution-free-uncertainty-guarantees">Conformal Risk Calibration</a></li>
+                <li class="nav-item"><a href="#102-institutional-tripartite-underwriting-triage">Tripartite Underwriting Triage</a></li>
+                <li class="nav-item"><a href="#103-conformalized-quantile-regression-cqr-on-heteroskedastic-loss">CQR Heteroskedastic Loss</a></li>
+                <li class="nav-item"><a href="#104-mondrian-group-conditional-conformal-fairness-auditing">Mondrian Fairness Auditing</a></li>
+                <li class="nav-item"><a href="#43-the-meta-learner-hierarchy-for-cate-estimation">Causal Uplift & X-Learner</a></li>
+                <li class="nav-item"><a href="#45-closed-form-net-expected-value-nev-budget-policy-optimization">NEV Budget Policy Optimizer</a></li>
             </ul>
         </aside>
 
@@ -717,7 +1095,7 @@
                         <span class="stat-label">C++ Parity Error</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-value">17 / 17</span>
+                        <span class="stat-value">30 / 30</span>
                         <span class="stat-label">Pytest Passed</span>
                     </div>
                 </div>
@@ -840,7 +1218,7 @@ $$\Delta I(S; j, s) = I(S) - \left[ \frac{|S_L|}{|S|} I(S_L) + \frac{|S_R|}{|S|}
    Maximizing $\Delta \text{Entropy}$ is equivalent to maximizing the mutual information between the split indicator and the target label.</p>
 </li>
 </ol>
-<h4 id="13-handling-continuous-features-exact-sorting-xyzinlinemathtoken143xyz">1.3 Handling Continuous Features: Exact Sorting $\mathcal{O}(N \log N)$</h4>
+<h4 id="13-handling-continuous-features-exact-sorting-xyzinlinemathtoken155xyz">1.3 Handling Continuous Features: Exact Sorting $\mathcal{O}(N \log N)$</h4>
 <p>For a continuous feature $X_j$:
 1. Sort the $N$ training instances along feature $j$: $x_{(1), j} \le x_{(2), j} \le \dots \le x_{(N), j}$ ($\mathcal{O}(N \log N)$ time).
 2. Evaluate candidate split thresholds at midpoints: $s_k = \frac{x_{(k), j} + x_{(k+1), j}}{2}$ for adjacent distinct values.
@@ -927,7 +1305,7 @@ $$\theta^{(m)} = \theta^{(m-1)} - \eta \nabla_\theta \mathcal{L}(\theta)$$</p>
 <p>$$F_0(x) = \arg\min_\rho \sum_{i=1}^n L(y_i, \rho)$$
 - For squared loss $L = \frac{1}{2}(y - F)^2$: $F_0(x) = \bar{y}$ (sample mean).
 - For binary cross-entropy: $F_0(x) = \ln \left( \frac{\bar{y}}{1 - \bar{y}} \right)$ (log-odds of sample base rate).</p>
-<h5 id="step-2-sequential-boosting-iterations-for-xyzinlinemathtoken205xyz-to-xyzinlinemathtoken206xyz">Step 2: Sequential Boosting Iterations (For $m = 1$ to $M$)</h5>
+<h5 id="step-2-sequential-boosting-iterations-for-xyzinlinemathtoken217xyz-to-xyzinlinemathtoken218xyz">Step 2: Sequential Boosting Iterations (For $m = 1$ to $M$)</h5>
 <ol>
 <li><strong>Compute Pseudo-Residuals (Negative Gradients)</strong>:
    Evaluate the negative gradient of the loss function with respect to the current model predictions for every training sample $i \in \{1, \dots, n\}$:
@@ -1133,7 +1511,7 @@ $$G_{\text{parent}} = \sum_{i=1}^4 g_i = 0.50 + 0.50 - 0.50 - 0.50 = \mathbf{0.0
 $$H_{\text{parent}} = \sum_{i=1}^4 h_i = 0.25 + 0.25 + 0.25 + 0.25 = \mathbf{1.00}$$</p>
 <h4 id="step-2-evaluate-all-candidate-split-boundaries">Step 2: Evaluate All Candidate Split Boundaries</h4>
 <p>Sorted unique feature values: $\{10, 20, 30, 40\}$. The exact greedy engine evaluates candidate splits at adjacent midpoints:</p>
-<h5 id="candidate-split-1-xyzinlinemathtoken295xyz-partition-xyzinlinemathtoken296xyz-vs-xyzinlinemathtoken297xyz">Candidate Split 1: $s = 15$ (Partition: $\{1\}$ vs $\{2, 3, 4\}$)</h5>
+<h5 id="candidate-split-1-xyzinlinemathtoken307xyz-partition-xyzinlinemathtoken308xyz-vs-xyzinlinemathtoken309xyz">Candidate Split 1: $s = 15$ (Partition: $\{1\}$ vs $\{2, 3, 4\}$)</h5>
 <ul>
 <li>Left Child ($I_L = \{1\}$): $G_L = +0.50, \quad H_L = 0.25$</li>
 <li>Right Child ($I_R = \{2, 3, 4\}$): $G_R = 0.50 - 0.50 - 0.50 = -0.50, \quad H_R = 0.75$</li>
@@ -1141,7 +1519,7 @@ $$H_{\text{parent}} = \sum_{i=1}^4 h_i = 0.25 + 0.25 + 0.25 + 0.25 = \mathbf{1.0
   $$\text{Gain}_1 = \frac{1}{2} \left[ \frac{(0.50)^2}{0.25 + 1.0} + \frac{(-0.50)^2}{0.75 + 1.0} - \frac{(0.0)^2}{1.00 + 1.0} \right] - 0.10$$
   $$\text{Gain}_1 = \frac{1}{2} \left[ \frac{0.25}{1.25} + \frac{0.25}{1.75} - 0 \right] - 0.10 = \frac{1}{2} [0.2000 + 0.1429] - 0.10 = \mathbf{0.0714}$$</li>
 </ul>
-<h5 id="candidate-split-2-xyzinlinemathtoken302xyz-partition-xyzinlinemathtoken303xyz-vs-xyzinlinemathtoken304xyz">Candidate Split 2: $s = 25$ (Partition: $\{1, 2\}$ vs $\{3, 4\}$)</h5>
+<h5 id="candidate-split-2-xyzinlinemathtoken314xyz-partition-xyzinlinemathtoken315xyz-vs-xyzinlinemathtoken316xyz">Candidate Split 2: $s = 25$ (Partition: $\{1, 2\}$ vs $\{3, 4\}$)</h5>
 <ul>
 <li>Left Child ($I_L = \{1, 2\}$): $G_L = 0.50 + 0.50 = \mathbf{+1.00}, \quad H_L = 0.25 + 0.25 = \mathbf{0.50}$</li>
 <li>Right Child ($I_R = \{3, 4\}$): $G_R = -0.50 - 0.50 = \mathbf{-1.00}, \quad H_R = 0.25 + 0.25 = \mathbf{0.50}$</li>
@@ -1149,7 +1527,7 @@ $$H_{\text{parent}} = \sum_{i=1}^4 h_i = 0.25 + 0.25 + 0.25 + 0.25 = \mathbf{1.0
   $$\text{Gain}_2 = \frac{1}{2} \left[ \frac{(1.00)^2}{0.50 + 1.0} + \frac{(-1.00)^2}{0.50 + 1.0} - \frac{(0.0)^2}{1.00 + 1.0} \right] - 0.10$$
   $$\text{Gain}_2 = \frac{1}{2} \left[ \frac{1.00}{1.50} + \frac{1.00}{1.50} - 0 \right] - 0.10 = \frac{1}{2} [0.6667 + 0.6667] - 0.10 = 0.6667 - 0.10 = \mathbf{0.5667}$$</li>
 </ul>
-<h5 id="candidate-split-3-xyzinlinemathtoken309xyz-partition-xyzinlinemathtoken310xyz-vs-xyzinlinemathtoken311xyz">Candidate Split 3: $s = 35$ (Partition: $\{1, 2, 3\}$ vs $\{4\}$)</h5>
+<h5 id="candidate-split-3-xyzinlinemathtoken321xyz-partition-xyzinlinemathtoken322xyz-vs-xyzinlinemathtoken323xyz">Candidate Split 3: $s = 35$ (Partition: $\{1, 2, 3\}$ vs $\{4\}$)</h5>
 <ul>
 <li>Left Child ($I_L = \{1, 2, 3\}$): $G_L = +0.50, \quad H_L = 0.75$</li>
 <li>Right Child ($I_R = \{4\}$): $G_R = -0.50, \quad H_R = 0.25$</li>
@@ -1159,13 +1537,13 @@ $$H_{\text{parent}} = \sum_{i=1}^4 h_i = 0.25 + 0.25 + 0.25 + 0.25 = \mathbf{1.0
 <h4 id="step-3-select-optimal-split-pruning-check">Step 3: Select Optimal Split &amp; Pruning Check</h4>
 <p>$$\arg\max (\text{Gain}) = \text{Split 2 } (s = 25) \quad \text{with Gain} = 0.5667$$
 Because $\text{Gain} = 0.5667 > 0$, the split is <strong>accepted</strong> and not pruned by $\gamma = 0.10$.</p>
-<h4 id="step-4-calculate-analytical-leaf-weights-xyzinlinemathtoken318xyz">Step 4: Calculate Analytical Leaf Weights ($w^*$)</h4>
+<h4 id="step-4-calculate-analytical-leaf-weights-xyzinlinemathtoken330xyz">Step 4: Calculate Analytical Leaf Weights ($w^*$)</h4>
 <p>Using equation $w_j^* = -\frac{G_j}{H_j + \lambda}$:
 - <strong>Left Leaf ($x \le 25$)</strong>:
   $$w_L^* = -\frac{+1.00}{0.50 + 1.0} = -\frac{1.00}{1.50} = \mathbf{-0.6667}$$
 - <strong>Right Leaf ($x > 25$)</strong>:
   $$w_R^* = -\frac{-1.00}{0.50 + 1.0} = -\frac{-1.00}{1.50} = \mathbf{+0.6667}$$</p>
-<h4 id="step-5-update-margins-with-shrinkage-xyzinlinemathtoken322xyz">Step 5: Update Margins with Shrinkage ($\eta = 0.30$)</h4>
+<h4 id="step-5-update-margins-with-shrinkage-xyzinlinemathtoken334xyz">Step 5: Update Margins with Shrinkage ($\eta = 0.30$)</h4>
 <p>Using $F_1(x) = F_0(x) + \eta \cdot w^*$:
 - For Applicants 1 &amp; 2 ($x \le 25$):
   $$F_1(x) = 0.0 + 0.30 \times (-0.6667) = \mathbf{-0.2000}$$
@@ -1326,7 +1704,7 @@ Random RAM Access:        [ g_8492 ] [ g_12 ] ... [ g_44012 ]
 <blockquote>
 <p><strong>Answer</strong>: The gradient indicates the direction of steepest descent, but tells nothing about curvature. By dividing the gradient sum by the Hessian sum ($w^* = -G / (H + \lambda)$), XGBoost computes the optimal Newton step analytically. The Hessian $h_i$ acts as a per-instance adaptive learning rate: small curvature yields large confident steps, whereas high curvature scales back the step size. This eliminates line search, improves stability, and enables fast convergence.</p>
 </blockquote>
-<h4 id="q2-what-does-xyzinlinemathtoken377xyz-actually-reject-mechanically">Q2: What does $\gamma$ actually reject, mechanically?</h4>
+<h4 id="q2-what-does-xyzinlinemathtoken389xyz-actually-reject-mechanically">Q2: What does $\gamma$ actually reject, mechanically?</h4>
 <blockquote>
 <p><strong>Answer</strong>: $\gamma$ is subtracted from the score reduction before accepting any split: $\text{Gain} = \text{Score Reduction} - \gamma$. If the reduction in loss from splitting a node into two children is less than $\gamma$, the Gain is $\le 0$ and the split is rejected (pruned). Therefore, $\gamma$ is the minimum loss reduction required to justify adding another leaf to the tree model.</p>
 </blockquote>
@@ -1334,7 +1712,7 @@ Random RAM Access:        [ g_8492 ] [ g_12 ] ... [ g_44012 ]
 <blockquote>
 <p><strong>Answer</strong>: For binary classification under logloss, $h_i = p_i(1 - p_i)$. Highly confident samples ($p_i \approx 0$ or $p_i \approx 1$) have near-zero Hessian ($h_i \approx 0$), while uncertain samples ($p_i = 0.5$) have maximal Hessian ($h_i = 0.25$). Measuring <code>min_child_weight</code> in terms of $\sum h_i$ ensures that each leaf contains sufficient <strong>statistical information and uncertainty</strong>, rather than merely a count of rows. A leaf with 100 confident points may have $\sum h_i < 1.0$ and be rejected, preventing splits on homogenous, uninformative clusters.</p>
 </blockquote>
-<h4 id="q4-what-does-xyzinlinemathtoken391xyz-do-to-a-leaf-weight-as-it-grows-large">Q4: What does $\lambda$ do to a leaf weight as it grows large?</h4>
+<h4 id="q4-what-does-xyzinlinemathtoken403xyz-do-to-a-leaf-weight-as-it-grows-large">Q4: What does $\lambda$ do to a leaf weight as it grows large?</h4>
 <blockquote>
 <p><strong>Answer</strong>: As $\lambda \to \infty$, $w^* = -\frac{G}{H + \lambda} \to 0$. L2 regularization in the denominator shrinks every leaf weight toward zero regardless of the gradient magnitude. This prevents extreme leaf predictions and stabilizes the model on noisy or sparse data.</p>
 </blockquote>
@@ -1721,12 +2099,12 @@ bst = xgb.train(
 <h3 id="7-class-imbalance-the-operational-alert-budget-trap">7. Class Imbalance &amp; The Operational Alert Budget Trap</h3>
 <p>In production banking operations, investigative teams can review at most <strong>5% of transactions</strong> (the Alert Budget).</p>
 <p><img alt="Fraud Threshold Metrics" src="./03_basic_usage_and_tuning/fraud_threshold_metrics.png" /></p>
-<h4 id="1-fixed-threshold-trap-xyzinlinemathtoken458xyz-vs-xyzinlinemathtoken459xyz">1. Fixed Threshold Trap ($t = 0.50$ vs. $t = 0.05$)</h4>
+<h4 id="1-fixed-threshold-trap-xyzinlinemathtoken470xyz-vs-xyzinlinemathtoken471xyz">1. Fixed Threshold Trap ($t = 0.50$ vs. $t = 0.05$)</h4>
 <ul>
 <li><strong>At $t = 0.50$</strong>: Config A (<code>spw=1.0</code>) flags only 0.7% of accounts (catches only 23.5% of fraud). Config B (<code>spw=43.3</code>) flags 1.9% of accounts and catches 55.9% of fraud.</li>
 <li><strong>At $t = 0.05$</strong>: Config B flags <strong>17.5%</strong> of all transactions (262 reviews to catch 32 frauds), completely blowing past operational budgets!</li>
 </ul>
-<h4 id="2-fair-production-comparison-capacity-constrained-alert-volume-xyzinlinemathtoken462xyz">2. Fair Production Comparison: Capacity-Constrained Alert Volume ($\le 5\%$)</h4>
+<h4 id="2-fair-production-comparison-capacity-constrained-alert-volume-xyzinlinemathtoken474xyz">2. Fair Production Comparison: Capacity-Constrained Alert Volume ($\le 5\%$)</h4>
 <ul>
 <li><strong>Config A (<code>scale_pos_weight=1.0</code>)</strong>: At threshold $t=0.048$, yields <strong>4.93%</strong> alert volume, <strong>33.78%</strong> precision, and <strong>73.53%</strong> recall.</li>
 <li><strong>Config B (<code>scale_pos_weight=43.3</code>)</strong>: At threshold $t=0.198$, yields <strong>5.00%</strong> alert volume, <strong>33.33%</strong> precision, and <strong>73.53%</strong> recall.</li>
@@ -1997,7 +2375,10 @@ bst = xgb.train(
 <p>The minimal production script <a href="./03_basic_usage_and_tuning/optuna_xgboost_canonical.py"><code>optuna_xgboost_canonical.py</code></a> demonstrates correct callback binding:</p>
 <pre><code class="language-python">import optuna
 import xgboost as xgb
-from optuna.integration import XGBoostPruningCallback
+try:
+    from optuna_integration import XGBoostPruningCallback  # Optuna &gt;= 4.0
+except ImportError:
+    from optuna.integration import XGBoostPruningCallback  # Fallback for Optuna &lt; 4.0
 from optuna.pruners import MedianPruner
 
 def objective(trial: optuna.Trial) -&gt; float:
@@ -2102,7 +2483,7 @@ graph TD
 <p>For an arbitrary black-box model $f$, computing $\mathbb{E}[f(x) \mid x_S]$ requires either:
 1. Evaluating all $2^{|F|}$ possible feature subsets ($\mathcal{O}(2^M)$ exponential time). For an enterprise credit scoring model with $M = 50$ features, $2^{50} \approx 1.12 \times 10^{15}$ evaluations—computationally intractable.
 2. Relying on <strong>KernelSHAP</strong> / Monte Carlo sampling approximations. In high dimensions, sampling introduces stochastic variance between successive runs. For supervisory regulators, non-deterministic attributions mean adverse action reason codes may vary between audit cycles on the exact same applicant record.</p>
-<h4 id="13-treeshap-exact-polynomial-time-recursion-xyzinlinemathtoken507xyz">1.3 TreeSHAP: Exact Polynomial-Time Recursion $\mathcal{O}(TLD^2)$</h4>
+<h4 id="13-treeshap-exact-polynomial-time-recursion-xyzinlinemathtoken519xyz">1.3 TreeSHAP: Exact Polynomial-Time Recursion $\mathcal{O}(TLD^2)$</h4>
 <p>In their landmark paper (<em>Nature Machine Intelligence</em>, 2020), Lundberg et al. demonstrated that for tree ensembles, exact Shapley values can be evaluated in polynomial time without sampling:</p>
 <p>$$\text{Time Complexity: } \mathcal{O}(T \cdot L \cdot D^2)$$</p>
 <p>Where:</p>
@@ -2138,7 +2519,7 @@ graph TD
 <li><strong>Exactness Guarantee</strong>: Summing leaf attributions across all $T$ trees yields the exact Shapley attribution vector $\boldsymbol{\phi}(x) = (\phi_1, \dots, \phi_M)^T$ such that:
    $$\sum_{i=1}^M \phi_i(x) = f(x) - \mathbb{E}[f(x)]$$</li>
 </ol>
-<h4 id="15-shap-interaction-values-xyzinlinemathtoken535xyz">1.5 SHAP Interaction Values ($\Phi_{ij}$)</h4>
+<h4 id="15-shap-interaction-values-xyzinlinemathtoken547xyz">1.5 SHAP Interaction Values ($\Phi_{ij}$)</h4>
 <p>Standard Shapley values collapse multi-variable interactions into a single net attribution per feature. Lundberg et al. generalized the Shapley interaction index from game theory to trees:</p>
 <p>$$\Phi_{ij}(x) = \sum_{S \subseteq F \setminus \{i, j\}} \frac{|S|!(|F| - |S| - 2)!}{2(|F| - 1)!} \left[ f_x(S \cup \{i, j\}) - f_x(S \cup \{i\}) - f_x(S \cup \{j\}) + f_x(S) \right]$$</p>
 <ul>
@@ -2872,7 +3253,35 @@ $$\text{cannot all hold simultaneously, unless the classifier achieves perfect p
 <li><strong>Proposal 3 (Training Pipeline)</strong>: Standardize all banking ML model refreshes on the 4-Stage Bayesian Optuna Tuner.</li>
 </ol>
 <hr />
-<h3 id="10-capstone-readiness-gate-mastery-checkpoint">10. Capstone Readiness Gate (Mastery Checkpoint)</h3>
+<h3 id="10-conformal-prediction-distribution-free-uncertainty-guarantees">10. Conformal Prediction &amp; Distribution-Free Uncertainty Guarantees</h3>
+<p>In algorithmic lending and high-stakes financial risk decisioning, point estimates (e.g. $\hat{P}(\text{Default} \mid \mathbf{x}) = 0.49$) fail to capture <strong>epistemic uncertainty</strong>. Regulators under <strong>Federal Reserve SR 11-7</strong> and <strong>OCC Bulletin 2011-12</strong> require rigorous bounds on predictive uncertainty.</p>
+<p><strong>Conformal Prediction</strong> (Vovk et al., 2005) provides exact, finite-sample, distribution-free guarantees without parametric assumptions:
+$$\mathbb{P}\left(Y_{n+1} \in \mathcal{C}(X_{n+1})\right) \ge 1 - \alpha$$
+under the single assumption of <strong>Exchangeability</strong>.</p>
+<h4 id="101-split-conformal-classification-finite-sample-quantile-indexing">10.1 Split Conformal Classification &amp; Finite-Sample Quantile Indexing</h4>
+<p>Non-conformity scores are computed on held-out calibration data:
+$$s_i = 1 - \hat{\pi}_{y_i}(x_i) + \epsilon_i, \quad \epsilon_i \sim \mathcal{U}(0, 10^{-6})$$
+where infinitesimal jitter breaks probability ties resulting from discrete tree leaves.</p>
+<p>To guarantee $1 - \alpha$ coverage, the quantile cutoff requires finite-sample inflation:
+$$\hat{q} = \text{Quantile}\left(\{s_1, \dots, s_n\}; \;\; \frac{\lceil (n+1)(1 - \alpha) \rceil}{n}\right)$$
+Prediction sets are generated as $\mathcal{C}(\mathbf{x}) = \{k : \hat{\pi}_k(\mathbf{x}) \ge 1 - \hat{q}\}$.</p>
+<h4 id="102-institutional-tripartite-underwriting-triage">10.2 Institutional Tripartite Underwriting Triage</h4>
+<p>In production banking pipelines, prediction sets translate directly into automated workflow actions:
+- $\mathcal{C}(\mathbf{x}) = \{0\}$: <strong>Straight-Through Processing (STP) Auto-Approve</strong> (Negligible default rate $<5\%$).
+- $\mathcal{C}(\mathbf{x}) = \{1\}$: <strong>Automated Denial</strong> (High default probability $>60\%$).
+- $\mathcal{C}(\mathbf{x}) = \{0, 1\}$: <strong>Refer to Senior Underwriter</strong> (Model expresses honest boundary uncertainty; 3.6x higher risk than auto-approved).
+- $\mathcal{C}(\mathbf{x}) = \{\}$: <strong>Out-of-Distribution (OOD) Anomaly Flag</strong> (All class probabilities fall below conformal threshold).</p>
+<h4 id="103-conformalized-quantile-regression-cqr-on-heteroskedastic-loss">10.3 Conformalized Quantile Regression (CQR) on Heteroskedastic Loss</h4>
+<p>For Loss Given Default (LGD) and Value-at-Risk (VaR), loss distributions exhibit severe <strong>conditional heteroskedasticity</strong>. Raw pinball quantile regressors systematically under-cover out-of-sample.</p>
+<p>Romano et al. (2019) CQR fits dual XGBoost regressors with <code>reg:quantileerror</code> at $\alpha/2$ and $1 - \alpha/2$, calibrating conformal expansion factor $\hat{q}$:
+$$E_i = \max(\hat{q}_{\alpha/2}(x_i) - y_i, \;\; y_i - \hat{q}_{1-\alpha/2}(x_i))$$
+$$\mathcal{I}(\mathbf{x}) = [\max(0.0, \hat{q}_{\alpha/2}(\mathbf{x}) - \hat{q}), \;\; \hat{q}_{1-\alpha/2}(\mathbf{x}) + \hat{q}]$$
+where $\max(0.0, \dots)$ enforces physical zero-clipping for monetary losses, guaranteeing valid, non-inverted prediction intervals.</p>
+<h4 id="104-mondrian-group-conditional-conformal-fairness-auditing">10.4 Mondrian (Group-Conditional) Conformal Fairness Auditing</h4>
+<p>Marginal coverage of 95% can conceal severe demographic under-coverage (&lt;90%) in protected groups or high-risk FICO tiers. Mondrian Conformal Auditing computes group-specific cutoffs $\hat{q}_g$ with empirical Bayesian shrinkage for small sample cohorts ($n_g < 30$), guaranteeing:
+$$\mathbb{P}(Y \in \mathcal{C}(X) \mid G=g) \ge 1 - \alpha, \quad \forall g \in \mathcal{G}$$</p>
+<hr />
+<h3 id="11-capstone-readiness-gate-mastery-checkpoint">11. Capstone Readiness Gate (Mastery Checkpoint)</h3>
 <ol>
 <li><strong>In custom objectives, what space are predictions passed in?</strong><br />
 <strong>Answer</strong>: Raw untransformed margin space ($z \in \mathbb{R}$). For classification, the sigmoid link $p = 1 / (1 + e^{-z})$ must be evaluated explicitly.</li>
@@ -2884,6 +3293,8 @@ $$\text{cannot all hold simultaneously, unless the classifier achieves perfect p
 <strong>Answer</strong>: No. Prior imputation destroys predictive sparsity signals. XGBoost natively evaluates default routing directions per split node, achieving superior PR-AUC.</li>
 <li><strong>Can a credit model simultaneously satisfy calibration and equalized odds when default base rates differ?</strong><br />
 <strong>Answer</strong>: No (Kleinberg Impossibility Theorem, 2017). When base rates differ across demographic cohorts, no non-trivial model can simultaneously achieve calibration within groups, equal FPR, and equal FNR. Prioritizing calibration + equal opportunity (Hardt et al., 2016) is the legally and financially defensible choice for banking.</li>
+<li><strong>Under what core mathematical condition does Conformal Prediction guarantee finite-sample coverage?</strong><br />
+<strong>Answer</strong>: Exchangeability. If macro conditions cause covariate drift, guarantees fail without rolling-window recalibration.</li>
 </ol>
 <hr />
 <p><a id="module-06-banking--finance-projects"></a></p>
@@ -2994,21 +3405,45 @@ where $Y_i(1)$ is conversion under marketing contact ($T=1$), and $Y_i(0)$ is co
   &lt;b&gt;4. Sleeping Dogs&lt;/b&gt;   │ NO (Unsubscribe)      │ YES                   │ ◄── &lt;b&gt;AVOID (Negative ROI)&lt;/b&gt;
  ────────────────────┴───────────────────────┴───────────────────────┘
 </code></pre>
-<h4 id="43-causal-uplift-architectures">4.3 Causal Uplift Architectures</h4>
+<h4 id="43-the-meta-learner-hierarchy-for-cate-estimation">4.3 The Meta-Learner Hierarchy for CATE Estimation</h4>
+<h5 id="1-s-learner-single-model-baseline-the-regularization-pathology">1. S-Learner (Single Model Baseline &amp; The Regularization Pathology)</h5>
+<p>Estimates a single surface $\mu(x, t) = \mathbb{E}[Y \mid X=x, T=t]$ treating $T \in \{0, 1\}$ as an ordinary covariate:
+$$\hat{\tau}_S(x) = \hat{\mu}(x, 1) - \hat{\mu}(x, 0)$$</p>
+<blockquote>
+<p><strong>The S-Learner Pathology</strong>: When feature dimension $|X| \gg 1$, tree regularization (shrinkage, min_child_weight, colsample) frequently ignores the treatment variable $T$ during split node selection. In our diagnostics, treatment split fraction drops to $<1.5\%$, shrinking CATE estimates toward zero.</p>
+</blockquote>
+<h5 id="2-t-learner-two-independent-models-variance-instability">2. T-Learner (Two Independent Models &amp; Variance Instability)</h5>
+<p>Fits two separate models on treatment and control cohorts:
+$$\hat{\tau}_T(x) = \hat{\mu}_1(x) - \hat{\mu}_0(x)$$</p>
+<blockquote>
+<p><strong>The T-Learner Pathology</strong>: When treatment cohorts are imbalanced (e.g. $15\%$ treated vs $85\%$ control in retail banking), the treated model $\hat{\mu}_1(x)$ has significantly higher estimation variance than $\hat{\mu}_0(x)$, causing noisy, unstable CATE tails.</p>
+</blockquote>
+<h5 id="3-x-learner-kunzel-et-al-pnas-2019-with-k-fold-cross-fitting">3. X-Learner (Künzel et al., PNAS 2019 with K-Fold Cross-Fitting)</h5>
+<p>The gold standard for imbalanced causal inference, utilizing a 3-stage architecture:
+- <strong>Stage 1</strong>: Fit response surfaces $\hat{\mu}_0(x)$ on control and $\hat{\mu}_1(x)$ on treated.
+- <strong>Stage 2</strong>: Impute counterfactual unobserved treatment effects with <strong>K-Fold cross-fitting</strong> to eliminate in-sample residual bias:
+  $$D_i^1 = Y_i^1 - \hat{\mu}_0^{-k(i)}(X_i^1) \quad (\text{Imputed Effect on Treated})$$
+  $$D_i^0 = \hat{\mu}_1^{-k(i)}(X_i^0) - Y_i^0 \quad (\text{Imputed Effect on Control})$$
+  Train second-stage regressors $\hat{\tau}_1(x)$ on $(X^1, D^1)$ and $\hat{\tau}_0(x)$ on $(X^0, D^0)$.
+- <strong>Stage 3</strong>: Estimate propensity score $e(x) = \mathbb{P}(T=1 \mid X)$ and combine via optimal propensity weighting:
+  $$\hat{\tau}_X(x) = e(x) \hat{\tau}_0(x) + (1 - e(x)) \hat{\tau}_1(x)$$</p>
+<blockquote>
+<p><strong>Mathematical Weighting Intuition</strong>: When treatment is rare ($e(x) \to 0$), the control group is large and $\hat{\mu}_0$ is accurate, making $D^1$ clean. Hence $\hat{\tau}_1$ receives high weight $1 - e(x)$. Conversely, when treatment is common ($e(x) \to 1$), $\hat{\mu}_1$ is accurate, making $D^0$ clean and giving $\hat{\tau}_0$ weight $e(x)$.</p>
+</blockquote>
+<h4 id="44-causal-evaluation-statistical-significance">4.4 Causal Evaluation &amp; Statistical Significance</h4>
 <ol>
-<li><strong>The Two-Model Approach (T-Learner)</strong>:</li>
-<li>Fit independent model $f_T(x)$ on treatment group ($T=1$).</li>
-<li>Fit independent model $f_C(x)$ on control group ($T=0$).</li>
-<li>Predicted Uplift: $\hat{\tau}(x) = f_T(x) - f_C(x)$.</li>
-<li><strong>Class Transformation (Lai's Generalized Method)</strong>:
-   Define transformed target variable $Z_i$:
-   $$Z_i = Y_i \cdot T_i + (1 - Y_i)(1 - T_i)$$
-   Under randomized 50/50 treatment assignment, optimizing cross-entropy loss against $Z$ directly trains a single XGBoost model to optimize causal uplift $\tau(x) = 2 P(Z=1 \mid x) - 1$.</li>
-<li><strong>Causal Evaluation (Qini Curve &amp; Qini Coefficient)</strong>:
-   Models are evaluated by plotting cumulative incremental gains across ranked deciles:
-   $$Q(t) = n_{t, 1} - n_{c, 1} \frac{n_t}{n_c}$$
-   Maximizing the area under the Qini curve ensures marketing spend is focused purely on Persuadables.</li>
+<li><strong>Cumulative Qini Curve</strong>:
+   $$Q(k) = n_{t, 1}(k) - n_{c, 1}(k) \left(\frac{N_t(k)}{N_c(k)}\right)$$</li>
+<li><strong>Normalized AUUC (Area Under the Uplift Curve)</strong>:
+   Integrated area under $Q(k)$ evaluated via trapezoidal quadrature and normalized by total population size $N$.</li>
+<li><strong>Bootstrap Permutation Test</strong>:
+   Tests the sharp null hypothesis $H_0: \tau_i = 0$ by permuting treatment labels $T$ over $B=1,000$ iterations to establish non-parametric empirical $p$-values.</li>
 </ol>
+<h4 id="45-closed-form-net-expected-value-nev-budget-policy-optimization">4.5 Closed-Form Net Expected Value (NEV) Budget Policy Optimization</h4>
+<p>Rather than treating a naive top fraction of uplift, institutional profitability requires optimizing dollar-denominated Net Expected Value under unit contact costs:
+$$\text{NEV}(x) = \hat{\tau}(x) \cdot V_{\text{conversion}} - C_{\text{contact}}$$
+$$\pi^*(x) = \mathbb{I}\left(\text{NEV}(x) > 0 \;\; \text{and} \;\; \text{Rank}(\hat{\tau}(x)) \le \lfloor B \cdot N \rfloor\right)$$</p>
+<p>In empirical banking testing, this closed-form causal policy delivers <strong>+20% to +40% net campaign profit</strong> over traditional propensity-to-buy targeting by actively eliminating wasted spend on <em>Sure Things</em> and preventing churn among <em>Sleeping Dogs</em>.</p>
 <hr />
 <h3 id="project-5-massive-bank-data-inference-microservice-architecture-06_projects_finance05_massive_bank_data">Project 5: Massive Bank Data &amp; Inference Microservice Architecture (<code>06_projects_finance/05_massive_bank_data</code>)</h3>
 <h4 id="51-real-world-scale-latency-constraints">5.1 Real-World Scale &amp; Latency Constraints</h4>
@@ -3094,7 +3529,7 @@ params = {
 }
 booster = xgb.train(params, dtrain, num_boost_round=200)
 </code></pre>
-<h4 id="64-extracting-parametric-survival-curves-xyzinlinemathtoken780xyz">6.4 Extracting Parametric Survival Curves $S(t \mid \mathbf{x})$</h4>
+<h4 id="64-extracting-parametric-survival-curves-xyzinlinemathtoken831xyz">6.4 Extracting Parametric Survival Curves $S(t \mid \mathbf{x})$</h4>
 <p>From the trained AFT booster, the conditional survival probability that a loan remains solvent past month $t$ is analytically evaluated:
 $$S(t \mid \mathbf{x}) = 1 - \Phi \left( \frac{\ln(t) - f(\mathbf{x})}{\sigma} \right)$$
 Marginal default probabilities for any future year $[\tau_1, \tau_2]$ are directly extracted without retraining:
@@ -3252,20 +3687,31 @@ model = pipeline.fit(train_df)
             document.getElementById('progress-bar').style.width = scrolled + '%';
         });
 
-        // 2. Theme Toggle
+        // 2. Theme Persistence & Toggle
+        const savedTheme = localStorage.getItem('study_guide_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
         function toggleTheme() {
             const current = document.documentElement.getAttribute('data-theme');
             const target = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('study_guide_theme', target);
         }
 
         // 3. Search / TOC Filter
         function filterToc() {
             const q = document.getElementById('toc-filter').value.toLowerCase();
-            const items = document.querySelectorAll('#sidebar-toc .nav-item');
+            const items = document.querySelectorAll('.portal-sidebar .nav-item');
             items.forEach(item => {
                 const text = item.textContent.toLowerCase();
                 item.style.display = text.includes(q) ? 'block' : 'none';
+            });
+            document.querySelectorAll('.portal-sidebar .nav-section-title').forEach(title => {
+                const list = title.nextElementSibling;
+                if (list && list.classList.contains('nav-links')) {
+                    const visibleItems = Array.from(list.querySelectorAll('.nav-item')).some(i => i.style.display !== 'none');
+                    title.style.display = visibleItems ? 'block' : 'none';
+                }
             });
         }
 

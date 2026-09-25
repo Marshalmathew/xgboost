@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../0
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../03_basic_usage_and_tuning")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../04_advanced_features")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../05_production_and_quirks")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../06_projects_finance/04_marketing_propensity")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../06_projects_finance/05_massive_bank_data")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../07_distributed_xgboost")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../scripts")))
@@ -802,4 +803,347 @@ def test_distributed_pipeline_interfaces():
 
     ray_res = run_ray_pipeline()
     assert "framework" in ray_res and ray_res["framework"] == "Ray"
+
+
+def test_causal_dgp_properties():
+    """Verify statistical properties and continuity of causal uplift synthetic dataset."""
+    from generate_synthetic_data import generate_uplift_dataset
+
+    df = generate_uplift_dataset(n_samples=2500, seed=42)
+    assert not df.isna().any().any()
+    assert len(df) == 2500
+
+    # Required columns
+    expected_cols = [
+        "account_balance", "customer_age", "tenure_months", "credit_card_spend_30d",
+        "web_logins_30d", "has_direct_deposit", "treatment", "outcome", "propensity_score",
+        "tau_true", "mu_0", "mu_1"
+    ]
+    for col in expected_cols:
+        assert col in df.columns, f"Missing column {col}"
+
+    # RCT treatment probability between 10% and 25%
+    treatment_rate = df["treatment"].mean()
+    assert 0.10 <= treatment_rate <= 0.25, f"Treatment rate {treatment_rate} outside [0.10, 0.25]"
+
+    # Smooth, continuous CATE (not hard-coded archetypes)
+    assert df["tau_true"].nunique() > 100, "tau_true is not continuous"
+    assert df["tau_true"].min() < 0.0, "tau_true lacks Sleeping Dog negative region"
+    assert df["tau_true"].max() > 0.15, "tau_true lacks Persuadables positive region"
+
+
+def test_xlearner_propensity_weighting_direction():
+    """Verify Künzel et al. (PNAS 2019) counterfactual imputation weighting in X-Learner."""
+    from causal_uplift_engine import XGBoostXLearner
+    from generate_synthetic_data import generate_uplift_dataset
+
+    df = generate_uplift_dataset(n_samples=2000, seed=42)
+    features = [
+        "account_balance", "customer_age", "tenure_months",
+        "credit_card_spend_30d", "web_logins_30d", "has_direct_deposit"
+    ]
+    X = df[features]
+    t = df["treatment"].values
+    y = df["outcome"].values
+    tau_true = df["tau_true"].values
+
+    xl = XGBoostXLearner(n_estimators=30, max_depth=3, random_state=42).fit(X, t, y)
+    tau_pred = xl.predict_cate(X)
+
+    # Positive correlation with ground truth treatment effect
+    corr = np.corrcoef(tau_pred, tau_true)[0, 1]
+    assert corr > 0.40, f"X-Learner correlation with true tau too low: {corr:.3f}"
+
+
+def test_cross_fitting_reduces_bias():
+    """Verify that K-fold cross-fitting eliminates in-sample overfitting on counterfactual residuals."""
+    from causal_uplift_engine import XGBoostXLearner
+    from generate_synthetic_data import generate_uplift_dataset
+
+    df_train = generate_uplift_dataset(n_samples=3000, seed=42)
+    features = [
+        "account_balance", "customer_age", "tenure_months",
+        "credit_card_spend_30d", "web_logins_30d", "has_direct_deposit"
+    ]
+    X = df_train[features]
+    t = df_train["treatment"].values
+    y = df_train["outcome"].values
+    tau_true = df_train["tau_true"].values
+
+    # Fit with and without cross-fitting
+    xl_cf = XGBoostXLearner(n_estimators=30, max_depth=3, n_splits=5, use_cross_fitting=True, random_state=42)
+    xl_cf.fit(X, t, y)
+    tau_cf = xl_cf.predict_cate(X)
+
+    xl_nocf = XGBoostXLearner(n_estimators=30, max_depth=3, use_cross_fitting=False, random_state=42)
+    xl_nocf.fit(X, t, y)
+    tau_nocf = xl_nocf.predict_cate(X)
+
+    rmse_cf = np.sqrt(np.mean((tau_cf - tau_true) ** 2))
+    rmse_nocf = np.sqrt(np.mean((tau_nocf - tau_true) ** 2))
+    assert rmse_cf < rmse_nocf, f"Expected CF RMSE ({rmse_cf:.4f}) < NoCF RMSE ({rmse_nocf:.4f})"
+
+
+def test_qini_and_auuc_correctness():
+    """Verify Qini curve, AUUC, and bootstrap permutation statistical test."""
+    from causal_uplift_engine import bootstrap_permutation_test, compute_auuc, compute_qini_curve
+    from generate_synthetic_data import generate_uplift_dataset
+
+    df = generate_uplift_dataset(n_samples=3000, seed=42)
+    y = df["outcome"].values
+    t = df["treatment"].values
+    tau_true = df["tau_true"].values
+
+    fracs, q_vals = compute_qini_curve(y, t, tau_true, n_bins=10)
+    assert len(fracs) == 11
+    assert q_vals[0] == 0.0
+
+    auuc_true = compute_auuc(y, t, tau_true)
+    auuc_rand = compute_auuc(y, t, np.random.RandomState(42).randn(len(y)))
+    assert auuc_true > auuc_rand, "Oracle AUUC must exceed random baseline AUUC"
+
+    # Permutation test: oracle must be significant (p < 0.05)
+    perm_oracle = bootstrap_permutation_test(y, t, tau_true, n_bootstrap=200, random_state=42)
+    assert perm_oracle["is_significant"], f"Oracle should be significant, got p={perm_oracle['p_value']}"
+
+    # Permutation test: random permutation must NOT be significant
+    perm_rand = bootstrap_permutation_test(y, t, np.random.RandomState(42).randn(len(y)), n_bootstrap=200, random_state=42)
+    assert not perm_rand["is_significant"], f"Random noise should not be significant, got p={perm_rand['p_value']}"
+
+
+def test_budget_optimizer_policy_dominance():
+    """Verify closed-form NEV argmax policy optimizer dominates naive propensity targeting."""
+    import xgboost as xgb
+    from causal_uplift_engine import (
+        XGBoostXLearner,
+        evaluate_policy_realized_profit,
+        optimize_policy,
+    )
+    from generate_synthetic_data import generate_uplift_dataset
+
+    df = generate_uplift_dataset(n_samples=3000, seed=42)
+    features = [
+        "account_balance", "customer_age", "tenure_months",
+        "credit_card_spend_30d", "web_logins_30d", "has_direct_deposit"
+    ]
+    X = df[features]
+    t = df["treatment"].values
+    y = df["outcome"].values
+    tau_true = df["tau_true"].values
+
+    # Train X-Learner
+    xl = XGBoostXLearner(n_estimators=30, max_depth=3, random_state=42).fit(X, t, y)
+    tau_hat = xl.predict_cate(X)
+
+    # Train naive propensity model P(Y=1|X)
+    clf_naive = xgb.XGBClassifier(n_estimators=30, max_depth=3, random_state=42, eval_metric="logloss")
+    clf_naive.fit(X, y)
+    p_naive = clf_naive.predict_proba(X)[:, 1]
+
+    # Evaluate at 15% budget
+    b = 0.15
+    mask_causal = optimize_policy(tau_hat, budget_ratio=b)
+    res_causal = evaluate_policy_realized_profit(mask_causal, y, t, tau_true=tau_true)
+
+    naive_rank = np.argsort(-p_naive)
+    mask_naive = np.zeros(len(y), dtype=bool)
+    mask_naive[naive_rank[:int(b * len(y))]] = True
+    res_naive = evaluate_policy_realized_profit(mask_naive, y, t, tau_true=tau_true)
+
+    # Causal uplift policy must dominate naive predictive policy by >= 10%
+    assert res_causal["net_profit"] > res_naive["net_profit"] * 1.10, (
+        f"Causal net profit ({res_causal['net_profit']:.1f}) did not dominate naive ({res_naive['net_profit']:.1f}) by >= 10%"
+    )
+
+
+def test_conformal_classification_coverage_guarantee():
+    """Verify Split Conformal finite-sample coverage guarantees and sample-size guardrails."""
+    from conformal_risk_calibration import SplitConformalClassifier, train_calibrate_test_split
+    from generate_synthetic_data import generate_conformal_credit_dataset
+
+    df = generate_conformal_credit_dataset(n_samples=4000, seed=42)
+    feature_cols = [
+        "annual_income", "loan_amount", "fico_score",
+        "debt_to_income", "revolving_utilization", "inquiries_last_6m"
+    ]
+    train_df, calib_df, test_df = train_calibrate_test_split(df, 0.50, 0.25, 0.25, random_state=42)
+
+    X_train, y_train = train_df[feature_cols], train_df["is_default"].values
+    X_calib, y_calib = calib_df[feature_cols], calib_df["is_default"].values
+    X_test, y_test = test_df[feature_cols], test_df["is_default"].values
+
+    # Test alpha = 0.05 (95% nominal coverage)
+    clf_95 = SplitConformalClassifier(alpha=0.05, random_state=42)
+    clf_95.fit(X_train, y_train)
+    clf_95.calibrate(X_calib, y_calib)
+    metrics_95 = clf_95.evaluate_coverage(X_test, y_test)
+
+    assert metrics_95["empirical_coverage"] >= 0.95 - 0.02, (
+        f"Expected coverage >= 0.93, got {metrics_95['empirical_coverage']:.4f}"
+    )
+    assert metrics_95["mean_set_size"] > 0.0
+
+    # Test alpha = 0.10 (90% nominal coverage)
+    clf_90 = SplitConformalClassifier(alpha=0.10, random_state=42)
+    clf_90.fit(X_train, y_train)
+    clf_90.calibrate(X_calib, y_calib)
+    metrics_90 = clf_90.evaluate_coverage(X_test, y_test)
+
+    assert metrics_90["empirical_coverage"] >= 0.90 - 0.02, (
+        f"Expected coverage >= 0.88, got {metrics_90['empirical_coverage']:.4f}"
+    )
+
+    # Test sample size guardrail (n < 1/alpha - 1 must raise ValueError)
+    clf_small = SplitConformalClassifier(alpha=0.01)  # requires n >= 99
+    clf_small.fit(X_train, y_train)
+    with pytest.raises(ValueError, match="Calibration set size .* is too small"):
+        clf_small.calibrate(X_calib[:50], y_calib[:50])
+
+
+def test_tripartite_triage_semantics():
+    """Verify banking tripartite triage actions, default rate separation, and ambiguity handling."""
+    from conformal_risk_calibration import SplitConformalClassifier, train_calibrate_test_split
+    from generate_synthetic_data import generate_conformal_credit_dataset
+
+    df = generate_conformal_credit_dataset(n_samples=4000, seed=42)
+    feature_cols = [
+        "annual_income", "loan_amount", "fico_score",
+        "debt_to_income", "revolving_utilization", "inquiries_last_6m"
+    ]
+    train_df, calib_df, test_df = train_calibrate_test_split(df, 0.50, 0.25, 0.25, random_state=42)
+
+    clf = SplitConformalClassifier(alpha=0.05, random_state=42)
+    clf.fit(train_df[feature_cols], train_df["is_default"].values)
+    clf.calibrate(calib_df[feature_cols], calib_df["is_default"].values)
+
+    triage_df = clf.triage_policy(test_df[feature_cols])
+    test_df_eval = test_df.copy()
+    test_df_eval["triage_action"] = triage_df["triage_action"].values
+
+    # Check key categories exist in production portfolio
+    actions = set(triage_df["triage_action"].unique())
+    assert "AUTO_APPROVE" in actions
+    assert "REFER_TO_SENIOR_UNDERWRITER" in actions
+
+    # Risk separation: Auto-approved loans must have substantially lower default rate than referred
+    auto_approve_defaults = test_df_eval[test_df_eval["triage_action"] == "AUTO_APPROVE"]["is_default"]
+    referred_defaults = test_df_eval[test_df_eval["triage_action"] == "REFER_TO_SENIOR_UNDERWRITER"]["is_default"]
+
+    assert auto_approve_defaults.mean() < 0.10, (
+        f"Auto-approve default rate too high: {auto_approve_defaults.mean():.4f}"
+    )
+    assert referred_defaults.mean() > auto_approve_defaults.mean() * 2.0, (
+        f"Referred loans ({referred_defaults.mean():.4f}) did not achieve 2x risk separation over auto-approved ({auto_approve_defaults.mean():.4f})"
+    )
+
+    # Test all 4 mapping states: {0} -> AUTO_APPROVE, {1} -> AUTO_DENY, {0, 1} -> REFER, {} -> OOD
+    # By verifying triage mapping on mock prediction sets
+    class MockClassifier(SplitConformalClassifier):
+        def predict_set(self, X):
+            return [[0], [1], [0, 1], []]
+        def predict_proba(self, X):
+            return np.array([[0.95, 0.05], [0.05, 0.95], [0.50, 0.50], [0.20, 0.20]])
+
+    mock_clf = MockClassifier(alpha=0.05)
+    mock_clf.is_calibrated_ = True
+    mock_clf.q_hat_ = 0.85
+    mock_triage = mock_clf.triage_policy(pd.DataFrame([[1, 2, 3]] * 4))
+    expected_actions = ["AUTO_APPROVE", "AUTO_DENY", "REFER_TO_SENIOR_UNDERWRITER", "OUT_OF_DISTRIBUTION_ALERT"]
+    assert mock_triage["triage_action"].tolist() == expected_actions
+
+
+def test_cqr_heteroskedastic_coverage():
+    """Verify CQR heteroskedastic loss intervals, finite-sample coverage, and zero-bound clipping."""
+    from conformal_risk_calibration import (
+        ConformalizedQuantileRegressor,
+        train_calibrate_test_split,
+    )
+    from generate_synthetic_data import generate_conformal_credit_dataset
+
+    df = generate_conformal_credit_dataset(n_samples=4000, seed=42)
+    feature_cols = [
+        "annual_income", "loan_amount", "fico_score",
+        "debt_to_income", "revolving_utilization", "inquiries_last_6m"
+    ]
+    train_df, calib_df, test_df = train_calibrate_test_split(df, 0.50, 0.25, 0.25, random_state=42)
+
+    X_train, y_train = train_df[feature_cols], train_df["loss_given_default"].values
+    X_calib, y_calib = calib_df[feature_cols], calib_df["loss_given_default"].values
+    X_test, y_test = test_df[feature_cols], test_df["loss_given_default"].values
+
+    cqr = ConformalizedQuantileRegressor(alpha=0.10, n_estimators=40, max_depth=3, random_state=42)
+    cqr.fit(X_train, y_train)
+    cqr.calibrate(X_calib, y_calib)
+
+    metrics = cqr.evaluate_coverage(
+        X_test, y_test,
+        true_sigma=test_df["sigma_loss_latent"].values,
+        clip_zero=True
+    )
+
+    # Calibrated CQR coverage must be >= 0.88 for nominal 0.90
+    assert metrics["cqr_calibrated_coverage"] >= 0.88, (
+        f"CQR coverage ({metrics['cqr_calibrated_coverage']:.4f}) failed to achieve target 0.90"
+    )
+
+    # Verify zero-bound clipping: no negative monetary loss bounds
+    cal_lo, cal_hi = cqr.predict_interval(X_test, clip_zero=True)
+    assert np.all(cal_lo >= 0.0), "Physical zero clipping failed: negative loss bound detected"
+    assert np.all(cal_hi >= cal_lo), "Inverted intervals detected"
+
+    # Interval width must adapt to heteroskedastic conditional volatility
+    assert metrics["width_heteroskedastic_correlation"] > 0.35, (
+        f"Adaptive width correlation too weak: {metrics['width_heteroskedastic_correlation']:.4f}"
+    )
+
+
+def test_mondrian_group_conditional_fairness():
+    """Verify Mondrian group-conditional calibration eliminates demographic under-coverage."""
+    from conformal_risk_calibration import (
+        MondrianConformalAuditor,
+        SplitConformalClassifier,
+        train_calibrate_test_split,
+    )
+    from generate_synthetic_data import generate_conformal_credit_dataset
+
+    df = generate_conformal_credit_dataset(n_samples=4000, seed=42)
+    feature_cols = [
+        "annual_income", "loan_amount", "fico_score",
+        "debt_to_income", "revolving_utilization", "inquiries_last_6m"
+    ]
+    train_df, calib_df, test_df = train_calibrate_test_split(df, 0.50, 0.25, 0.25, random_state=42)
+
+    clf = SplitConformalClassifier(alpha=0.05, random_state=42)
+    clf.fit(train_df[feature_cols], train_df["is_default"].values)
+    clf.calibrate(calib_df[feature_cols], calib_df["is_default"].values)
+
+    # Baseline marginal prediction sets
+    test_sets_marginal = clf.predict_set(test_df[feature_cols])
+    marginal_audit = MondrianConformalAuditor.audit_marginal_vs_group_coverage(
+        test_df["is_default"].values, test_sets_marginal, test_df["fico_tier"].values, target_coverage=0.95
+    )
+    assert len(marginal_audit) == 3
+
+    # Calibrate group-conditional cutoffs
+    group_cutoffs = MondrianConformalAuditor.calibrate_group_conditional(
+        clf, calib_df[feature_cols], calib_df["is_default"].values, calib_df["fico_tier"].values, alpha=0.05
+    )
+    assert "Prime" in group_cutoffs
+    assert "NearPrime" in group_cutoffs
+    assert "Subprime" in group_cutoffs
+
+    # Predict group-conditional prediction sets
+    mondrian_sets = MondrianConformalAuditor.predict_set_group_conditional(
+        clf, test_df[feature_cols], test_df["fico_tier"].values, group_cutoffs
+    )
+    mondrian_audit = MondrianConformalAuditor.audit_marginal_vs_group_coverage(
+        test_df["is_default"].values, mondrian_sets, test_df["fico_tier"].values, target_coverage=0.95
+    )
+
+    # Every tier must meet group-conditional guarantee (>= 0.95 - 0.025)
+    for _, row in mondrian_audit.iterrows():
+        assert row["empirical_coverage"] >= 0.925, (
+            f"Group {row['group']} under-covered in Mondrian calibration: {row['empirical_coverage']:.4f}"
+        )
+
 

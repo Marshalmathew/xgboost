@@ -55,13 +55,17 @@ This repository is intentionally structured into three distinct documentation ti
 * **Pre-Chapter Diagnostic**: [`04_advanced_features/self_test_governance.md`](./04_advanced_features/self_test_governance.md).
 
 ### [Module 05: Production Deployment & Serving](./05_production_and_quirks/README.md)
-* **Objective**: Avoid the raw margin trap in custom loss functions, measure convexity and silent Hessian clipping, calibrate probabilities, and build drift monitoring (PSI/CSI).
-* **Key Implementations**: Hand-derived asymmetric AML loss ($k=10$), ONNX serving benchmarks, and Evidently drift dashboards.
+* **Objective**: Avoid the raw margin trap in custom loss functions, measure convexity and silent Hessian clipping, calibrate probabilities, build drift monitoring (PSI/CSI), and enforce distribution-free uncertainty guarantees via Conformal Prediction.
+* **Key Implementations**:
+  - Hand-derived asymmetric AML loss ($k=10$), ONNX serving benchmarks, and Evidently drift dashboards.
+  - Conformal Prediction Suite ([`conformal_risk_calibration.py`](./05_production_and_quirks/conformal_risk_calibration.py) and [`conformal_risk_lab.ipynb`](./05_production_and_quirks/conformal_risk_lab.ipynb)): Split Conformal finite-sample guarantees ($1 - \alpha$), Tripartite Underwriting Triage (`AUTO_APPROVE`, `AUTO_DENY`, `REFER`, `OOD`), Conformalized Quantile Regression (CQR) for heteroskedastic loss (LGD), and Mondrian fair lending audits with sample shrinkage.
 * **Pre-Chapter Diagnostic**: [`05_production_and_quirks/self_test_production.md`](./05_production_and_quirks/self_test_production.md).
 
 ### [Module 06: Capstone Banking Projects](./06_projects_finance/README.md)
-* **Objective**: Apply theory to institutional banking datasets across stock forecasting, transaction fraud, credit underwriting, marketing propensity, massive scale, and survival analysis.
-* **Key Implementations**: Accelerated Failure Time (`survival:aft`) for IFRS 9 / CECL Lifetime Expected Credit Loss.
+* **Objective**: Apply theory to institutional banking datasets across stock forecasting, transaction fraud, credit underwriting, marketing propensity, massive scale, survival analysis, and causal uplift decisioning.
+* **Key Implementations**:
+  - Accelerated Failure Time (`survival:aft`) for IFRS 9 / CECL Lifetime Expected Credit Loss.
+  - Causal ML & Uplift Decisioning: Cross-fitted X-Learner (Künzel et al. 2019), Unconfoundedness auditing, Qini evaluation curves, and budget-constrained closed-form NEV policy optimization (+20% to +40% net campaign profit).
 
 ### [Module 07: Distributed XGBoost Architecture](./07_distributed_xgboost/README.md)
 * **Objective**: Scale training across multi-node clusters using the Rabit ring AllReduce topology ($\mathcal{O}(\log P)$ communication) without parameter server bottlenecks.
@@ -116,3 +120,11 @@ To ensure zero setup friction, this repository supports two complementary data p
      ```bash
      uv run python download_kaggle.py
      ```
+
+---
+
+## 🚀 Strategic Roadmap & Advanced Content Extensions
+
+To review the planned architectural enhancements and high-value additions (Causal Uplift X-Learner, Sub-Millisecond Treelite C-Serving, and Conformal Uncertainty Guarantees), consult:
+👉 **[High-Value Content Extensions Roadmap (`HIGH_VALUE_EXTENSIONS_ROADMAP.md`)](./HIGH_VALUE_EXTENSIONS_ROADMAP.md)**
+

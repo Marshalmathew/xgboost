@@ -160,23 +160,41 @@ We benchmarked $N=1,000$ single-row (batch=1) inference queries across three ser
 > **Production Takeaway**: Standard `DMatrix` allocation incurs Python object wrapping overhead. Native C++ `inplace_predict` offers a $1.75\times$ speedup, while ONNX Runtime CPU delivers a **$45.9\times$ latency reduction** (down to $22.9\,\mu s$) with strict numerical agreement down to $1.79 \times 10^{-7}$.
 
 
+## 11. Conformal Prediction & Distribution-Free Uncertainty Guarantees
+
+Standard gradient boosted trees output point predictions (e.g., $\hat{P}(\text{Default} \mid \mathbf{x}) = 0.49$) without quantifying epistemic uncertainty. In high-stakes enterprise underwriting, relying on uncalibrated point predictions risks approving high-risk loans that sit on ambiguous decision boundaries.
+
+In [`conformal_risk_calibration.py`](./conformal_risk_calibration.py) and [`conformal_risk_lab.ipynb`](./conformal_risk_lab.ipynb), we implement mathematically rigorous conformal inference:
+1. **Split Conformal Classification**: Guarantees finite-sample coverage $P(Y \in \mathcal{C}(X)) \ge 1 - \alpha$ under exchangeability (Vovk et al., 2005) with exact quantile inflation $\lceil (n+1)(1-\alpha) \rceil / n$ and tie-breaking jitter.
+2. **Institutional Tripartite Triage**:
+   - `{0}`: **Straight-Through Processing (STP) Auto-Approve** (Negligible default rate).
+   - `{1}`: **Automated Denial** (High default probability).
+   - `{0, 1}`: **Refer to Senior Underwriter** (Epistemic boundary ambiguity where model expresses honest uncertainty).
+   - `{}`: **Out-of-Distribution (OOD) Anomaly Flag**.
+3. **Conformalized Quantile Regression (CQR)**: Heteroskedastic loss forecasting (Romano et al., 2019) via dual XGBoost pinball loss regressors (`reg:quantileerror`) with physical zero-clipping for Loss Given Default (LGD).
+4. **Mondrian Conformal Fairness Auditing**: Eliminates demographic under-coverage across FICO risk tiers (`Prime`, `NearPrime`, `Subprime`) with small-sample empirical Bayesian shrinkage.
+
+---
+
 ## 📁 Artifacts & Deliverables
 
-1. [custom_loss_and_sparsity.py](./custom_loss_and_sparsity.py) - Standalone script for SLE, custom loss, and sparsity benchmarks.
-2. [probability_calibration.py](./probability_calibration.py) - Standalone probability calibration suite (Platt, Isotonic, Murphy Brier decomposition, ECE).
-3. [production_drift_monitoring.py](./production_drift_monitoring.py) - Production statistical drift monitoring suite (PSI, KS-test, Jensen-Shannon, Evidently AI).
-4. [fairness_bias_audit.py](./fairness_bias_audit.py) - Fairlearn bias auditing and Hardt et al. post-processing threshold optimization pipeline.
-5. [day5_benchmarks.json](./day5_benchmarks.json) - Serialized metrics, SLE audit, and cost ledgers.
-6. [calibration_benchmarks.json](./calibration_benchmarks.json) - Serialized calibration metrics across models and operational tail slices.
-7. [drift_monitoring_summary.json](./drift_monitoring_summary.json) - Serialized PSI, KS-test, and JSD drift surveillance ledger.
-8. [fairness_audit_results.json](./fairness_audit_results.json) - Serialized disparate impact ratios, calibration-by-group, and before/after mitigation numbers.
-9. [model_governance_calibration_memo.md](./model_governance_calibration_memo.md) - Model Risk Management regulatory memorandum on calibration standards.
-10. [champion_challenger_retraining_policy.md](./champion_challenger_retraining_policy.md) - Formal Model Risk Management policy on drift surveillance and retraining.
-11. [model_governance_fairness_memo.md](./model_governance_fairness_memo.md) - Model Risk Management memorandum on algorithmic fairness, Kleinberg impossibility, and ECOA Reg B compliance.
-12. [asymmetric_vs_scale_pos_weight.png](./asymmetric_vs_scale_pos_weight.png) - PR curves and operational cost trade-offs.
-13. [sparsity_missing_value_benchmark.png](./sparsity_missing_value_benchmark.png) - Information gain retention comparison across imputation methods.
-14. [probability_calibration_benchmark.png](./probability_calibration_benchmark.png) - Multi-panel publication reliability diagrams and odds unbiasing curves.
-15. [drift_monitoring_dashboard.png](./drift_monitoring_dashboard.png) - Publication dashboard with PSI binning and ROC/PR degradation curves.
-16. [fairness_bias_audit_dashboard.png](./fairness_bias_audit_dashboard.png) - 4-panel dashboard with selection rate disparities, subgroup reliability diagrams, and post-processing shift.
-17. [evidently_drift_report.html](./evidently_drift_report.html) - Interactive HTML drift surveillance report generated via Evidently AI.
-18. [`../XGBoost_Playbook.md`](../XGBoost_Playbook.md) - The consolidated enterprise master playbook for high-stakes banking.
+1. [conformal_risk_calibration.py](./conformal_risk_calibration.py) - Standalone Split Conformal, CQR, and Mondrian fair calibration suite.
+2. [conformal_risk_lab.ipynb](./conformal_risk_lab.ipynb) - Interactive Jupyter lab validating finite-sample coverage, tripartite triage, CQR, and SR 11-7 memo.
+3. [custom_loss_and_sparsity.py](./custom_loss_and_sparsity.py) - Standalone script for SLE, custom loss, and sparsity benchmarks.
+4. [probability_calibration.py](./probability_calibration.py) - Standalone probability calibration suite (Platt, Isotonic, Murphy Brier decomposition, ECE).
+5. [production_drift_monitoring.py](./production_drift_monitoring.py) - Production statistical drift monitoring suite (PSI, KS-test, Jensen-Shannon, Evidently AI).
+6. [fairness_bias_audit.py](./fairness_bias_audit.py) - Fairlearn bias auditing and Hardt et al. post-processing threshold optimization pipeline.
+7. [day5_benchmarks.json](./day5_benchmarks.json) - Serialized metrics, SLE audit, and cost ledgers.
+8. [calibration_benchmarks.json](./calibration_benchmarks.json) - Serialized calibration metrics across models and operational tail slices.
+9. [drift_monitoring_summary.json](./drift_monitoring_summary.json) - Serialized PSI, KS-test, and JSD drift surveillance ledger.
+10. [fairness_audit_results.json](./fairness_audit_results.json) - Serialized disparate impact ratios, calibration-by-group, and before/after mitigation numbers.
+11. [model_governance_calibration_memo.md](./model_governance_calibration_memo.md) - Model Risk Management regulatory memorandum on calibration standards.
+12. [champion_challenger_retraining_policy.md](./champion_challenger_retraining_policy.md) - Formal Model Risk Management policy on drift surveillance and retraining.
+13. [model_governance_fairness_memo.md](./model_governance_fairness_memo.md) - Model Risk Management memorandum on algorithmic fairness, Kleinberg impossibility, and ECOA Reg B compliance.
+14. [asymmetric_vs_scale_pos_weight.png](./asymmetric_vs_scale_pos_weight.png) - PR curves and operational cost trade-offs.
+15. [sparsity_missing_value_benchmark.png](./sparsity_missing_value_benchmark.png) - Information gain retention comparison across imputation methods.
+16. [probability_calibration_benchmark.png](./probability_calibration_benchmark.png) - Multi-panel publication reliability diagrams and odds unbiasing curves.
+17. [drift_monitoring_dashboard.png](./drift_monitoring_dashboard.png) - Publication dashboard with PSI binning and ROC/PR degradation curves.
+18. [fairness_bias_audit_dashboard.png](./fairness_bias_audit_dashboard.png) - 4-panel dashboard with selection rate disparities, subgroup reliability diagrams, and post-processing shift.
+19. [evidently_drift_report.html](./evidently_drift_report.html) - Interactive HTML drift surveillance report generated via Evidently AI.
+20. [`../XGBoost_Playbook.md`](../XGBoost_Playbook.md) - The consolidated enterprise master playbook for high-stakes banking.

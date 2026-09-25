@@ -11,6 +11,7 @@ This repository is organized into a **3-Tier Documentation Standard**:
 1. **[Master Curriculum Roadmap (`CURRICULUM.md`)](./CURRICULUM.md)**: Master syllabus, prerequisite flowchart, learning progression, and the **5 Lethal Enterprise Production Footguns**.
 2. **[Enterprise XGBoost Playbook (`XGBoost_Playbook.md`)](./XGBoost_Playbook.md)**: Institutional governance standard with three production proposals ready for Model Risk / Architecture sign-off.
 3. **[Comprehensive Study Guide (`XGBoost_Mastery_Study_Guide.md`)](./XGBoost_Mastery_Study_Guide.md)**: Monolithic 2,000-line textbook with complete mathematical derivations (exportable to HTML/PDF via [`export_study_guide_pdf.py`](./export_study_guide_pdf.py)).
+4. **[High-Value Extensions Roadmap (`HIGH_VALUE_EXTENSIONS_ROADMAP.md`)](./HIGH_VALUE_EXTENSIONS_ROADMAP.md)**: Strategic blueprint detailing 3 high-impact enterprise extensions: Causal Uplift (X-Learner), Sub-Millisecond POS Serving (Treelite C-compilation), and Conformal Risk Calibration.
 
 ---
 
@@ -22,8 +23,8 @@ The repository is organized progressively into the following sections:
 - **[`02_xgboost_core_mechanics/`](./02_xgboost_core_mechanics/README.md)**: 2nd-order Taylor expansion, Newton-Raphson leaf weights, Gain formula, and Weighted Quantile Sketch.
 - **[`03_basic_usage_and_tuning/`](./03_basic_usage_and_tuning/README.md)**: Hyperparameter science, TPE Bayesian optimization (Optuna), MedianPruner, and learning curve diagnostics.
 - **[`04_advanced_features/`](./04_advanced_features/README.md)**: Monotonic constraints, interaction constraints (ECOA Reg B), TreeSHAP game theory, and **native Multi-Output Vector Trees**.
-- **[`05_production_and_quirks/`](./05_production_and_quirks/README.md)**: Custom loss derivations (Asymmetric AML loss $k=10$), ONNX serving, probability calibration, and **Model Governance (PSI/CSI) & Fair Lending Compliance**.
-- **[`06_projects_finance/`](./06_projects_finance/README.md)**: Real-world financial machine learning projects: fraud detection, credit scorecards, marketing propensity, massive scale data handling, and **Survival Analysis (AFT for Lifetime ECL)**.
+- **[`05_production_and_quirks/`](./05_production_and_quirks/README.md)**: Custom loss derivations (Asymmetric AML loss $k=10$), ONNX serving, probability calibration, **Conformal Prediction & Distribution-Free Uncertainty Guarantees (Split Conformal, CQR, Mondrian)**, and **Model Governance (PSI/CSI) & Fair Lending Compliance**.
+- **[`06_projects_finance/`](./06_projects_finance/README.md)**: Real-world financial machine learning projects: fraud detection, credit scorecards, marketing propensity, **Causal Uplift & X-Learner CATE Decisioning**, massive scale data handling, and **Survival Analysis (AFT for Lifetime ECL)**.
 - **[`07_distributed_xgboost/`](./07_distributed_xgboost/README.md)**: Scaling XGBoost training using the Rabit ring AllReduce topology across PySpark, Dask, and Ray.
 
 ---

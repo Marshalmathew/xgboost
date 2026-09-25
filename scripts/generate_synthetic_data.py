@@ -185,11 +185,199 @@ def generate_survival_dataset(n_samples: int = 10000, seed: int = 42) -> pd.Data
     return df
 
 
+def generate_uplift_dataset(
+    n_samples: int = 10000,
+    seed: int = 42,
+    observational: bool = False,
+    include_hidden_confounder: bool = False,
+) -> pd.DataFrame:
+    """
+    Generates synthetic retail banking uplift dataset for Causal Machine Learning (CATE).
+    Features continuous true uplift tau*(x) to evaluate S/T/X-Learners, Qini curves,
+    and budget-constrained ROI optimization.
+
+    Supports:
+    - RCT variant: Constant treatment assignment (e(x) = 0.15)
+    - Observational / Confounded variant: Treatment assignment confounded by customer
+      features and an optional hidden confounder ('relationship_manager_quality').
+    """
+    np.random.seed(seed)
+
+    # 1. Feature Generation
+    # account_balance: Log-normal $500 - $150,000
+    account_balance = np.exp(np.random.normal(9.5, 0.8, n_samples))
+    account_balance = np.clip(account_balance, 500.0, 150000.0)
+
+    # customer_age: Uniform integer 21 - 78
+    customer_age = np.random.randint(21, 79, size=n_samples)
+
+    # tenure_months: Uniform integer 3 - 180
+    tenure_months = np.random.randint(3, 181, size=n_samples)
+
+    # credit_card_spend_30d: Log-normal $0 - $8,000
+    credit_card_spend_30d = np.exp(np.random.normal(6.5, 1.0, n_samples))
+    credit_card_spend_30d = np.clip(credit_card_spend_30d, 0.0, 8000.0)
+
+    # web_logins_30d: Poisson(lambda=4), 0 - 30
+    web_logins_30d = np.random.poisson(4.0, size=n_samples)
+    web_logins_30d = np.clip(web_logins_30d, 0, 30)
+
+    # has_direct_deposit: Bernoulli(0.55)
+    has_direct_deposit = np.random.binomial(1, 0.55, size=n_samples)
+
+    # Optional hidden confounder
+    rm_quality = np.random.binomial(1, 0.40, size=n_samples)
+
+    # Standardized features for latent response surfaces
+    web_logins_z = (web_logins_30d - np.mean(web_logins_30d)) / (np.std(web_logins_30d) + 1e-8)
+    balance_z = (account_balance - np.mean(account_balance)) / (np.std(account_balance) + 1e-8)
+    tenure_z = (tenure_months - np.mean(tenure_months)) / (np.std(tenure_months) + 1e-8)
+
+    def sigmoid(z):
+        return 1.0 / (1.0 + np.exp(-np.clip(z, -30.0, 30.0)))
+
+    # 2. Continuous Ground-Truth CATE: tau*(x)
+    eps = np.random.normal(0, 0.02, n_samples)
+    tau_star_raw = (
+        0.40 * sigmoid(web_logins_z)
+        - 0.30 * sigmoid(balance_z)
+        + 0.15 * (has_direct_deposit == 0).astype(float)
+        - 0.05
+        + eps
+    )
+
+    # 3. Potential Outcomes Response Surfaces
+    # Base control conversion probability mu_0(x)
+    confounder_effect = 0.35 * (rm_quality - 0.40) if include_hidden_confounder else 0.0
+    mu_0_latent = -1.5 + 0.60 * balance_z + 0.40 * tenure_z + confounder_effect
+    mu_0 = np.clip(sigmoid(mu_0_latent), 0.02, 0.98)
+
+    # Treated conversion probability mu_1(x)
+    mu_1 = np.clip(mu_0 + tau_star_raw, 0.01, 0.99)
+
+    # True treatment effect tau_star
+    tau_star = mu_1 - mu_0
+
+    # 4. Treatment Assignment Mechanism
+    if observational:
+        if include_hidden_confounder:
+            propensity = sigmoid(-1.2 + 0.80 * balance_z + 1.50 * (rm_quality - 0.40))
+        else:
+            propensity = sigmoid(-1.2 + 0.80 * balance_z)
+        propensity = np.clip(propensity, 0.05, 0.95)
+    else:
+        propensity = np.full(n_samples, 0.15)
+
+    treatment = np.random.binomial(1, propensity)
+
+    # 5. Observed Outcomes
+    y_0 = np.random.binomial(1, mu_0)
+    y_1 = np.random.binomial(1, mu_1)
+    outcome = np.where(treatment == 1, y_1, y_0)
+
+    data_dict = {
+        "account_balance": account_balance,
+        "customer_age": customer_age,
+        "tenure_months": tenure_months,
+        "credit_card_spend_30d": credit_card_spend_30d,
+        "web_logins_30d": web_logins_30d,
+        "has_direct_deposit": has_direct_deposit,
+        "treatment": treatment,
+        "outcome": outcome,
+        "propensity_score": propensity,
+        "tau_true": tau_star,
+        "mu_0": mu_0,
+        "mu_1": mu_1,
+    }
+
+    if include_hidden_confounder:
+        data_dict["relationship_manager_quality"] = rm_quality
+
+    df = pd.DataFrame(data_dict)
+    return df
+
+
+def generate_conformal_credit_dataset(
+    n_samples: int = 15000,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """
+    Generates synthetic retail credit underwriting and heteroskedastic loss dataset
+    specifically engineered for Conformal Prediction, Tripartite Triage, CQR, and Mondrian Auditing.
+
+    Key Features:
+    - Highly non-linear default boundary with deliberate epistemic ambiguity near decision boundaries.
+    - Extreme heteroskedastic loss variance: conditional loss variance scales with loan amount and FICO risk.
+    - Demographically realistic FICO credit score tiers (Prime, NearPrime, Subprime) for Mondrian fairness audits.
+    """
+    np.random.seed(seed)
+
+    # 1. Covariates
+    income_log = np.random.normal(11.0, 0.45, n_samples)
+    annual_income = np.clip(np.exp(income_log), 25000.0, 300000.0)
+
+    loan_noise = np.random.normal(0, 0.35, n_samples)
+    loan_amount_log = income_log * 0.75 + 1.5 + loan_noise
+    loan_amount = np.clip(np.exp(loan_amount_log), 2000.0, 60000.0)
+
+    fico_score = np.clip(np.random.normal(690.0, 55.0, n_samples), 450.0, 850.0).round()
+    debt_to_income = np.random.beta(2, 5, n_samples) * 0.60 + 0.05
+    revolving_utilization = np.clip(np.random.beta(2, 4, n_samples) * 1.2, 0.0, 1.2)
+    inquiries_last_6m = np.clip(np.random.poisson(1.2, n_samples), 0, 6)
+
+    # FICO demographic tiers for Mondrian auditing
+    fico_tier = np.where(
+        fico_score > 720.0,
+        "Prime",
+        np.where(fico_score >= 660.0, "NearPrime", "Subprime"),
+    )
+
+    # 2. Binary Default Target with high ambiguity near FICO 620-680, DTI 0.35-0.45
+    logit = (
+        -3.5
+        + 2.2 * revolving_utilization
+        + 1.8 * debt_to_income
+        - 0.012 * (fico_score - 650.0)
+        + 0.40 * inquiries_last_6m
+    )
+    prob_default = 1.0 / (1.0 + np.exp(-logit))
+    is_default = np.random.binomial(1, prob_default)
+
+    # 3. Continuous Heteroskedastic Loss Given Default (LGD in $)
+    # Conditional mean loss depends on loan amount, FICO, and DTI
+    loss_fraction_latent = -0.5 - 0.005 * (fico_score - 650.0) + 1.2 * debt_to_income
+    loss_fraction_mean = 1.0 / (1.0 + np.exp(-loss_fraction_latent))
+    mu_loss = loan_amount * loss_fraction_mean
+
+    # Heteroskedastic conditional standard deviation: increases with lower FICO and higher loan amounts
+    sigma_loss = 0.15 * mu_loss + 0.20 * ((850.0 - fico_score) / 200.0) * mu_loss
+    loss_noise = np.random.normal(0, 1, n_samples)
+    loss_given_default = np.maximum(0.0, mu_loss + sigma_loss * loss_noise)
+
+    df = pd.DataFrame({
+        "annual_income": annual_income,
+        "loan_amount": loan_amount,
+        "fico_score": fico_score,
+        "debt_to_income": debt_to_income,
+        "revolving_utilization": revolving_utilization,
+        "inquiries_last_6m": inquiries_last_6m,
+        "fico_tier": fico_tier,
+        "prob_default_latent": prob_default,
+        "is_default": is_default,
+        "mu_loss_latent": mu_loss,
+        "sigma_loss_latent": sigma_loss,
+        "loss_given_default": loss_given_default,
+    })
+    return df
+
+
 DATASET_GENERATORS = {
     "credit": generate_credit_dataset,
     "fraud": generate_fraud_aml_dataset,
     "sketch": generate_sketch_dataset,
     "survival": generate_survival_dataset,
+    "uplift": generate_uplift_dataset,
+    "conformal": generate_conformal_credit_dataset,
 }
 
 
@@ -199,7 +387,7 @@ def main():
     )
     parser.add_argument(
         "--dataset",
-        choices=["credit", "fraud", "sketch", "survival", "all"],
+        choices=["credit", "fraud", "sketch", "survival", "uplift", "conformal", "all"],
         default="all",
         help="Dataset to generate (default: all)",
     )
@@ -207,7 +395,7 @@ def main():
         "--samples",
         type=int,
         default=None,
-        help="Number of samples (defaults: credit=15k, fraud=20k, sketch=4k, survival=10k)",
+        help="Number of samples (defaults: credit=15k, fraud=20k, sketch=4k, survival=10k, uplift=10k)",
     )
     parser.add_argument(
         "--seed",
@@ -249,3 +437,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
