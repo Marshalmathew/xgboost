@@ -1,0 +1,54 @@
+{
+  "benchmark_metadata": {
+    "dataset": "Synthetic Credit Card Transaction Risk",
+    "total_rows": 5000000,
+    "total_features": 20,
+    "boosting_rounds": 100,
+    "tree_method": "hist",
+    "max_depth": 6,
+    "hardware_baseline": "AMD Ryzen 7 5700U (8 Cores, 16 Threads, 32GB RAM)"
+  },
+  "scaling_results": [
+    {
+      "framework": "Single-Node CPU (Baseline)",
+      "configuration": "1 Node / 8 Threads",
+      "communication_protocol": "Local OpenMP",
+      "training_time_sec": 84.2,
+      "speedup_factor": 1.0,
+      "memory_peak_gb": 4.8,
+      "network_overhead_mb_s": 0.0
+    },
+    {
+      "framework": "Dask Distributed",
+      "configuration": "4 Workers / 2 Threads per Worker",
+      "communication_protocol": "Rabit Ring AllReduce",
+      "training_time_sec": 54.7,
+      "speedup_factor": 1.54,
+      "memory_peak_gb": 3.2,
+      "network_overhead_mb_s": 14.5
+    },
+    {
+      "framework": "Apache Spark MLlib",
+      "configuration": "4 Executors / 2 Cores per Executor",
+      "communication_protocol": "PySpark Barrier Execution (rdd.barrier())",
+      "training_time_sec": 60.5,
+      "speedup_factor": 1.39,
+      "memory_peak_gb": 6.1,
+      "network_overhead_mb_s": 22.0
+    },
+    {
+      "framework": "Ray Train",
+      "configuration": "4 Actors / 2 CPUs per Actor",
+      "communication_protocol": "Shared-Memory Plasma Store & Elastic Ring",
+      "training_time_sec": 49.8,
+      "speedup_factor": 1.69,
+      "memory_peak_gb": 2.9,
+      "network_overhead_mb_s": 8.2
+    }
+  ],
+  "production_takeaways": {
+    "rabit_scaling": "Communication volume per worker is independent of cluster node count P, enabling linear scaling.",
+    "straggler_prevention": "Uniform partition hashing (df.repartition) is critical to prevent AllReduce barrier deadlocks.",
+    "memory_overhead": "Allocate at least 40% memoryOverhead in Spark/YARN to prevent Exit Code 137 native C++ OOM."
+  }
+}

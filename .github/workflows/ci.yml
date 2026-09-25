@@ -26,6 +26,31 @@ jobs:
         python -m pip install --upgrade pip
         pip install .[dev]
 
+    - name: Lint with Ruff
+      run: |
+        ruff check .
+
+    - name: Assert no large files committed (>10MB)
+      run: |
+        python -c "
+        import subprocess, sys
+        result = subprocess.run(['git', 'ls-files'], capture_output=True, text=True, check=True)
+        large = []
+        for f in result.stdout.strip().split('\n'):
+            if not f: continue
+            try:
+                import os; sz = os.path.getsize(f)
+                if sz > 10 * 1024 * 1024:
+                    large.append((f, sz))
+            except OSError:
+                pass
+        if large:
+            print('Large files found in git history:')
+            for f, sz in large: print(f'  {f}: {sz / 1024 / 1024:.1f} MB')
+            sys.exit(1)
+        print('File-size check passed: no committed files exceed 10MB.')
+        "
+
     - name: Run Pytest
       run: |
         pytest tests/ -v

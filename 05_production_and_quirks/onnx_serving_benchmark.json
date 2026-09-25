@@ -1,0 +1,24 @@
+{
+  "dmatrix": {
+    "mean_us": 1210.19,
+    "p50_us": 1070.5,
+    "p95_us": 1839.46,
+    "p99_us": 2504.43,
+    "throughput_qps": 826.3
+  },
+  "inplace_predict": {
+    "mean_us": 562.17,
+    "p50_us": 532.2,
+    "p95_us": 711.07,
+    "p99_us": 927.98,
+    "throughput_qps": 1778.8
+  },
+  "onnx_runtime": {
+    "mean_us": 24.07,
+    "p50_us": 22.4,
+    "p95_us": 25.96,
+    "p99_us": 37.73,
+    "throughput_qps": 41538.6
+  },
+  "max_parity_diff": 1.1920928955078125e-07
+}

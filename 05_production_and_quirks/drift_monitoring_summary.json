@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "baseline_sample_size": 15000,
+    "current_sample_size": 10000,
+    "governance_standard": "SR 11-7 / OCC 2011-12",
+    "regulatory_thresholds": {
+      "stable": "< 0.10",
+      "moderate_warning": "0.10 - 0.25",
+      "critical_action": "> 0.25"
+    }
+  },
+  "feature_metrics": [
+    {
+      "feature": "debt_to_income",
+      "is_categorical": false,
+      "psi": 0.2218,
+      "ks_statistic": 0.19517,
+      "ks_pvalue": 1.07e-200,
+      "js_divergence": 0.16467,
+      "wasserstein_distance": 0.07746,
+      "drift_status": "MODERATE_DRIFT",
+      "governance_action": "Warning (Investigate / Shadow Retrain)"
+    },
+    {
+      "feature": "revolving_util",
+      "is_categorical": false,
+      "psi": 0.25011,
+      "ks_statistic": 0.1963,
+      "ks_pvalue": 4.74e-203,
+      "js_divergence": 0.17401,
+      "wasserstein_distance": 0.08996,
+      "drift_status": "CRITICAL_DRIFT",
+      "governance_action": "Action Required (Champion-Challenger Switch)"
+    },
+    {
+      "feature": "annual_income",
+      "is_categorical": false,
+      "psi": 0.00093,
+      "ks_statistic": 0.00973,
+      "ks_pvalue": 0.617,
+      "js_divergence": 0.01076,
+      "wasserstein_distance": 455.44704,
+      "drift_status": "STABLE",
+      "governance_action": "None (Monitor)"
+    },
+    {
+      "feature": "inquiry_count_6m",
+      "is_categorical": false,
+      "psi": 0.00115,
+      "ks_statistic": 0.01303,
+      "ks_pvalue": 0.258,
+      "js_divergence": 0.01199,
+      "wasserstein_distance": 0.0177,
+      "drift_status": "STABLE",
+      "governance_action": "None (Monitor)"
+    },
+    {
+      "feature": "channel",
+      "is_categorical": true,
+      "psi": 0.71486,
+      "ks_statistic": null,
+      "ks_pvalue": null,
+      "js_divergence": 0.28882,
+      "wasserstein_distance": null,
+      "drift_status": "CRITICAL_DRIFT",
+      "governance_action": "Action Required (Champion-Challenger Switch)"
+    },
+    {
+      "feature": "predicted_score",
+      "is_categorical": false,
+      "psi": 0.22141,
+      "ks_statistic": 0.20063,
+      "ks_pvalue": 0.0,
+      "js_divergence": 0.16486,
+      "wasserstein_distance": 0.06242,
+      "drift_status": "MODERATE_DRIFT",
+      "governance_action": "Warning (Investigate / Shadow Retrain)"
+    }
+  ],
+  "evidently_validation": {
+    "dataset_drift_detected": true,
+    "share_of_drifted_columns": 0.6667,
+    "number_of_drifted_columns": 4,
+    "test_gate_passed": false,
+    "report_html_path": "05_production_and_quirks/evidently_drift_report.html"
+  }
+}

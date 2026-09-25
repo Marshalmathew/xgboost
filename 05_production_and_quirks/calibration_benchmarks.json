@@ -1,0 +1,116 @@
+{
+  "Raw XGBoost (Uncalibrated)": {
+    "brier_score": 0.04366831108927727,
+    "ece": 0.006199474045634271,
+    "mce": 0.3024003307024638,
+    "log_loss": 0.16950668394565582,
+    "roc_auc": 0.792874947368421,
+    "pr_auc": 0.21019500566434088,
+    "reliability_murphy": 0.0005362727617911434,
+    "resolution_murphy": 0.004029894039131089,
+    "uncertainty_murphy": 0.0475,
+    "tail_slice": {
+      "threshold": 0.08,
+      "n_accounts": 809,
+      "tail_brier": 0.13024532794952393,
+      "tail_ece": 0.02258283461643238,
+      "tail_actual_default_rate": 0.1631644004944376,
+      "tail_mean_predicted_prob": 0.18574722111225128
+    }
+  },
+  "Platt Scaling (Sigmoid)": {
+    "brier_score": 0.04524096723396511,
+    "ece": 0.008024659271035206,
+    "mce": 0.61045928746926,
+    "log_loss": 0.1772079316395115,
+    "roc_auc": 0.792874947368421,
+    "pr_auc": 0.21019500566434088,
+    "reliability_murphy": 0.002275880090639253,
+    "resolution_murphy": 0.0038301257439527776,
+    "uncertainty_murphy": 0.0475,
+    "tail_slice": {
+      "threshold": 0.08,
+      "n_accounts": 425,
+      "tail_brier": 0.1809471419942385,
+      "tail_ece": 0.09339684307095478,
+      "tail_actual_default_rate": 0.2188235294117647,
+      "tail_mean_predicted_prob": 0.2453482534561647
+    }
+  },
+  "Isotonic Regression": {
+    "brier_score": 0.04342653490359519,
+    "ece": 0.00546083285314962,
+    "mce": 0.8281538486480713,
+    "log_loss": 0.18141053464464413,
+    "roc_auc": 0.7911056842105264,
+    "pr_auc": 0.19879678548065005,
+    "reliability_murphy": 0.00030007998933220684,
+    "resolution_murphy": 0.003961003260098433,
+    "uncertainty_murphy": 0.0475,
+    "tail_slice": {
+      "threshold": 0.08,
+      "n_accounts": 828,
+      "tail_brier": 0.12585400891864065,
+      "tail_ece": 0.02394092873026784,
+      "tail_actual_default_rate": 0.15942028985507245,
+      "tail_mean_predicted_prob": 0.1833612185853403
+    }
+  },
+  "Raw scale_pos_weight": {
+    "brier_score": 0.13007204234600067,
+    "ece": 0.2362626528374851,
+    "mce": 0.5947945713996887,
+    "log_loss": 0.407700777053833,
+    "roc_auc": 0.7768143157894737,
+    "pr_auc": 0.20389046757489337,
+    "reliability_murphy": 0.08609087174274851,
+    "resolution_murphy": 0.0037822395318440616,
+    "uncertainty_murphy": 0.0475,
+    "tail_slice": {
+      "threshold": 0.08,
+      "n_accounts": 3982,
+      "tail_brier": 0.16039462387561798,
+      "tail_ece": 0.28720830951217186,
+      "tail_actual_default_rate": 0.06027122049221497,
+      "tail_mean_predicted_prob": 0.34747952222824097
+    }
+  },
+  "scale_pos_weight (Odds-Unbiased)": {
+    "brier_score": 0.04406094551086426,
+    "ece": 0.016420550981536507,
+    "mce": 0.482557475566864,
+    "log_loss": 0.17673151195049286,
+    "roc_auc": 0.7768143157894737,
+    "pr_auc": 0.20389046757489337,
+    "reliability_murphy": 0.00044638970326942674,
+    "resolution_murphy": 0.003098146868378843,
+    "uncertainty_murphy": 0.0475,
+    "tail_slice": {
+      "threshold": 0.08,
+      "n_accounts": 558,
+      "tail_brier": 0.15129654109477997,
+      "tail_ece": 0.043561728891505995,
+      "tail_actual_default_rate": 0.1935483870967742,
+      "tail_mean_predicted_prob": 0.14998666942119598
+    }
+  },
+  "scale_pos_weight + Platt Scaling": {
+    "brier_score": 0.04379400406629424,
+    "ece": 0.004574244590730485,
+    "mce": 0.5890764690918067,
+    "log_loss": 0.17202793317477993,
+    "roc_auc": 0.7768143157894737,
+    "pr_auc": 0.20389046757489337,
+    "reliability_murphy": 0.00019523547941213627,
+    "resolution_murphy": 0.0036995653375914185,
+    "uncertainty_murphy": 0.0475,
+    "tail_slice": {
+      "threshold": 0.08,
+      "n_accounts": 931,
+      "tail_brier": 0.12325634281995343,
+      "tail_ece": 0.01964397936860622,
+      "tail_actual_default_rate": 0.15252416756176154,
+      "tail_mean_predicted_prob": 0.1696372061394255
+    }
+  }
+}

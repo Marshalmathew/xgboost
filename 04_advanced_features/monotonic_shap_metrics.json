@@ -1,0 +1,46 @@
+{
+    "unconstrained": {
+        "roc_auc": 0.7033464929784405,
+        "pr_auc": 0.6790848942723222,
+        "brier_score": 0.2166835516691208
+    },
+    "monotonic_constrained": {
+        "roc_auc": 0.7089455312386471,
+        "pr_auc": 0.6847224056162998,
+        "brier_score": 0.21430884301662445
+    },
+    "cost_of_compliance_auc_delta": -0.005599038260206579,
+    "interaction_constrained": {
+        "roc_auc": 0.7029952807818475,
+        "pr_auc": 0.6766144828200179,
+        "brier_score": 0.21638444066047668
+    },
+    "tree_dump_interactions": {
+        "unconstrained_co_occurrence_rate": 0.8733333333333333,
+        "unconstrained_trees_with_interaction": 131,
+        "constrained_co_occurrence_rate": 0.0,
+        "constrained_trees_with_interaction": 0
+    },
+    "shap_parity": {
+        "max_feature_diff": 0.0,
+        "max_bias_diff": 0.0
+    },
+    "case_study_kumar_trap": {
+        "applicant_id": 9584,
+        "annual_income": 106376.89520765914,
+        "loan_amount": 151007.54001503298,
+        "revolving_utilization": 0.3638514907851865,
+        "debt_to_income": 0.08411736906252393,
+        "credit_inquiries_12m": 0,
+        "delinquencies_2yr": 1,
+        "actual_default": 1,
+        "unconstrained_predicted_prob": 0.2672777771949768,
+        "monotonic_predicted_prob": 0.27972525358200073,
+        "unconstrained_shap_income": -0.3363410532474518,
+        "unconstrained_shap_loan": 0.1772584319114685,
+        "monotonic_shap_income": -0.28787049651145935,
+        "monotonic_shap_loan": 0.24013616144657135,
+        "unconstrained_collinear_net_attribution": -0.15908262133598328,
+        "monotonic_collinear_net_attribution": -0.047734335064888
+    }
+}

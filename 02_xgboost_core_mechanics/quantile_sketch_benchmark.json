@@ -1,0 +1,60 @@
+{
+    "clustering_summary": {
+        "region_high_hessian": "[40.0, 60.0]",
+        "total_candidates_weighted": 11,
+        "candidates_in_high_hessian_weighted": 9,
+        "percentage_in_high_hessian_weighted": 0.8181818181818182,
+        "candidates_in_high_hessian_value_spaced": 2,
+        "percentage_in_high_hessian_value_spaced": 0.18181818181818182,
+        "candidates_in_high_hessian_count_spaced": 1,
+        "percentage_in_high_hessian_count_spaced": 0.09090909090909091
+    },
+    "real_xgboost_comparison": {
+        "correlation_exact_vs_approx": 0.9997544108156542,
+        "max_absolute_prediction_diff": 0.18045207858085632,
+        "mean_absolute_prediction_diff": 0.0026583524886518717,
+        "root_split_exact": "0:[f0<50.4106445] yes=1,no=2,missing=1",
+        "root_split_approx": "0:[f0<50.3417282] yes=1,no=2,missing=2"
+    },
+    "proposals": {
+        "weighted_hessian_candidates": [
+            0.0011634755366141114,
+            40.774810500273226,
+            43.042741032099016,
+            45.32888347480276,
+            47.9181877629731,
+            50.127564462572934,
+            52.14596387214719,
+            54.56167893159349,
+            57.161268946989985,
+            59.36607912085384,
+            99.97176732861305
+        ],
+        "value_spaced_candidates": [
+            0.0011634755366141114,
+            9.99822386084426,
+            19.995284246151904,
+            29.99234463145955,
+            39.98940501676719,
+            49.98646540207484,
+            59.98352578738248,
+            69.98058617269012,
+            79.97764655799777,
+            89.97470694330542,
+            99.97176732861305
+        ],
+        "count_spaced_candidates": [
+            0.0011634755366141114,
+            9.157254973374624,
+            19.462357172805056,
+            29.319185926694917,
+            39.6775438516943,
+            50.05023584324544,
+            60.346422266740866,
+            69.60677012138586,
+            80.06654993679395,
+            89.63787791316503,
+            99.97176732861305
+        ]
+    }
+}

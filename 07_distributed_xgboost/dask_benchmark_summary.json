@@ -1,0 +1,11 @@
+{
+  "framework": "Dask",
+  "topology": "Rabit Ring AllReduce",
+  "reference_cluster": "4 Workers / 2 Threads (AMD Ryzen 7 5700U)",
+  "rows": 5000000,
+  "features": 20,
+  "single_node_baseline_sec": 84.2,
+  "dask_distributed_time_sec": 54.7,
+  "speedup_factor": "1.54x",
+  "status": "REFERENCE_BENCHMARK"
+}

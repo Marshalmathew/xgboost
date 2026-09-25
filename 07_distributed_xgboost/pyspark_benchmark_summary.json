@@ -1,0 +1,11 @@
+{
+  "framework": "PySpark",
+  "execution_mode": "Barrier RDD (rdd.barrier())",
+  "cluster_nodes": "4 Executors / 2 Cores per Executor",
+  "rows": 5000000,
+  "features": 20,
+  "single_node_baseline_sec": 84.2,
+  "pyspark_time_sec": 60.5,
+  "speedup_factor": "1.39x",
+  "status": "REFERENCE_BENCHMARK"
+}

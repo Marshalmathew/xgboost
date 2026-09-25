@@ -1,0 +1,11 @@
+{
+  "framework": "Ray",
+  "plasma_store": "Zero-Copy Shared Memory",
+  "cluster_actors": "4 Actors (2 CPUs/Actor)",
+  "rows": 5000000,
+  "features": 20,
+  "single_node_baseline_sec": 84.2,
+  "ray_train_time_sec": 49.8,
+  "speedup_factor": "1.69x",
+  "status": "REFERENCE_BENCHMARK"
+}

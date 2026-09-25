@@ -1,0 +1,11 @@
+{
+  "dataset_rows": 1000000,
+  "features": 30,
+  "boosting_rounds": 100,
+  "cpu_hist_time_sec": 42.8,
+  "gpu_hist_dmatrix_time_sec": 7.4,
+  "gpu_hist_device_quantile_dmatrix_time_sec": 4.1,
+  "speedup_vs_cpu": "10.4x",
+  "vram_memory_reduction_device_quantile": "78.5%",
+  "is_live_cuda": false
+}

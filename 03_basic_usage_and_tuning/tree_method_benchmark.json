@@ -1,0 +1,36 @@
+{
+  "10000": {
+    "exact": {
+      "wall_clock_sec": 1.5248,
+      "speedup_vs_exact": 1.0,
+      "pr_auc": 0.595
+    },
+    "approx": {
+      "wall_clock_sec": 1.7884,
+      "speedup_vs_exact": 0.85,
+      "pr_auc": 0.5862
+    },
+    "hist": {
+      "wall_clock_sec": 0.7657,
+      "speedup_vs_exact": 1.99,
+      "pr_auc": 0.597
+    }
+  },
+  "50000": {
+    "exact": {
+      "wall_clock_sec": 6.0671,
+      "speedup_vs_exact": 1.0,
+      "pr_auc": 0.6976
+    },
+    "approx": {
+      "wall_clock_sec": 5.0129,
+      "speedup_vs_exact": 1.21,
+      "pr_auc": 0.6885
+    },
+    "hist": {
+      "wall_clock_sec": 0.9714,
+      "speedup_vs_exact": 6.25,
+      "pr_auc": 0.6994
+    }
+  }
+}

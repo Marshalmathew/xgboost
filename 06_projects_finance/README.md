@@ -1,6 +1,11 @@
 # 06 - Capstone Projects: Finance Focus
 
+---
+[⬅️ Prev: 05 - Production & Quirks](../05_production_and_quirks/README.md) | [🏠 Master Curriculum](../CURRICULUM.md) | [Next: 07 - Distributed XGBoost ➡️](../07_distributed_xgboost/README.md)
+---
+
 To cement your authority on XGBoost, you will apply the theory and mechanics to real-world financial problems. These projects will challenge your ability to handle data, tune hyperparameters, interpret results with SHAP, and apply production quirks.
+
 
 ## Project 1: Stock Prediction / Financial Forecasting
 - **Goal**: Predict the future movement of a stock (Classification) or the future price (Regression).

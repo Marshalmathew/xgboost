@@ -1,8 +1,13 @@
 # 01 - Theory Foundations: The Pre-Requisites for XGBoost
 
+---
+[🏠 Master Curriculum](../CURRICULUM.md) | [📝 Pre-Chapter Diagnostic: Self-Test Foundations](./self_test_foundations.md) | [Next Module: 02 - XGBoost Core Mechanics ➡️](../02_xgboost_core_mechanics/README.md)
+---
+
 Before diving into Extreme Gradient Boosting (XGBoost), it is crucial to understand the foundational algorithms it builds upon: **Decision Trees** and **Ensemble Learning (Bagging vs. Boosting)**. 
 
 This module takes a rigorous, hands-on approach by building these concepts from scratch.
+
 
 ## 1. Decision Trees (CART)
 XGBoost is fundamentally an ensemble of Classification and Regression Trees (CART). Unlike standard decision trees that output categorical classes directly, CARTs assign real-valued scores in each of their leaves, regardless of whether the final task is classification or regression.

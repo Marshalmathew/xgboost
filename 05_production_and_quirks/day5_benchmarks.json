@@ -1,0 +1,102 @@
+{
+    "sle_audit": {
+        "correlation_custom_vs_native": 0.9993105561894985,
+        "max_abs_diff": 0.18422460556030273,
+        "negative_hessian_detected_in_stress_test": true,
+        "stress_test_log_diff": [
+            1.0986122886681096,
+            3.2386784521643803,
+            4.61015772749913
+        ],
+        "stress_test_raw_hessians": [
+            -0.002739230240780821,
+            -0.0008606991357802308,
+            -8.935812795473206e-05
+        ]
+    },
+    "bayes_optimal_evaluation": {
+        "custom_asymmetric_k10": {
+            "bayes_threshold": 0.09090909090909091,
+            "precision": 0.06125211505922166,
+            "recall": 0.905,
+            "f2_score": 0.24101198402130491,
+            "false_negatives": 19,
+            "false_positives": 2774,
+            "true_positives": 181,
+            "total_flagged": 2955,
+            "net_dollar_cost": 1482000.0
+        },
+        "scale_pos_weight_spw": {
+            "bayes_threshold": 0.09090909090909091,
+            "precision": 0.0538971807628524,
+            "recall": 0.975,
+            "f2_score": 0.2206880941602535,
+            "false_negatives": 5,
+            "false_positives": 3423,
+            "true_positives": 195,
+            "total_flagged": 3618,
+            "net_dollar_cost": 1736500.0
+        },
+        "standard_baseline": {
+            "bayes_threshold": 0.09090909090909091,
+            "precision": 0.2135306553911205,
+            "recall": 0.505,
+            "f2_score": 0.396700706991359,
+            "false_negatives": 99,
+            "false_positives": 372,
+            "true_positives": 101,
+            "total_flagged": 473,
+            "net_dollar_cost": 681000.0
+        },
+        "net_dollar_savings_vs_base": -801000.0,
+        "net_dollar_savings_vs_spw": 254500.0
+    },
+    "fixed_capacity_top_3pct": {
+        "custom_asymmetric_k10": {
+            "prauc": 0.25189868824112355,
+            "rocauc": 0.8244479166666667,
+            "precision_top_3pct": 0.32666666666666666,
+            "recall_top_3pct": 0.245,
+            "f2_score_top_3pct": 0.2578947368421053,
+            "false_negatives": 151,
+            "false_positives": 101,
+            "true_positives": 49,
+            "net_dollar_cost": 805500.0
+        },
+        "scale_pos_weight_spw": {
+            "prauc": 0.24432253525900946,
+            "rocauc": 0.8197489583333333,
+            "precision_top_3pct": 0.3466666666666667,
+            "recall_top_3pct": 0.26,
+            "f2_score_top_3pct": 0.2736842105263158,
+            "false_negatives": 148,
+            "false_positives": 98,
+            "true_positives": 52,
+            "net_dollar_cost": 789000.0
+        },
+        "standard_baseline": {
+            "prauc": 0.2405081263274601,
+            "rocauc": 0.8266729166666668,
+            "precision_top_3pct": 0.35333333333333333,
+            "recall_top_3pct": 0.265,
+            "f2_score_top_3pct": 0.2789473684210526,
+            "false_negatives": 147,
+            "false_positives": 97,
+            "true_positives": 53,
+            "net_dollar_cost": 783500.0
+        }
+    },
+    "borderline_gradient_analysis": {
+        "borderline_prob": 0.5,
+        "asymmetric_k10_grad_y1": -5.0,
+        "spw_s49_grad_y1": -12.0,
+        "gradient_magnitude_ratio": 2.4,
+        "explanation": "scale_pos_weight exerts a 2.4x-4.9x stronger gradient pull on borderline cases, distorting calibration and inflating false positive alerts beyond operational budget."
+    },
+    "sparsity_split_routing": {
+        "native_nan_routing": 0.2577464476403138,
+        "median_imputation": 0.24433690407382136,
+        "mean_imputation": 0.24299832649725495,
+        "constant_minus_999": 0.26031696371077595
+    }
+}

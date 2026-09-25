@@ -1,0 +1,109 @@
+{
+  "metadata": {
+    "model_type": "XGBoost Classifier (Facially Neutral)",
+    "sensitive_attribute": "age_cohort (Young <30 vs Mature >=30)",
+    "test_sample_size": 5000,
+    "governance_standards": [
+      "Equal Credit Opportunity Act (ECOA Reg B)",
+      "Federal Reserve SR 11-7 / OCC 2011-12",
+      "Kleinberg et al. (ITCS 2017) Impossibility Theorem",
+      "Hardt et al. (NeurIPS 2016) Equality of Opportunity"
+    ]
+  },
+  "unmitigated_metrics": {
+    "demographic_parity_ratio": 0.7211,
+    "demographic_parity_difference": 0.2449,
+    "equalized_odds_difference": 0.2596,
+    "equal_opportunity_difference": 0.2012,
+    "reference_group": {
+      "name": "Mature (Age>=30)",
+      "selection_rate": 0.8782,
+      "true_positive_rate": 0.9163,
+      "false_positive_rate": 0.8034
+    },
+    "protected_group": {
+      "name": "Young (Age<30)",
+      "selection_rate": 0.6333,
+      "true_positive_rate": 0.7151,
+      "false_positive_rate": 0.5438
+    },
+    "four_fifths_rule_passed": false
+  },
+  "mitigated_metrics": {
+    "demographic_parity_ratio": 0.8751,
+    "demographic_parity_difference": 0.0706,
+    "equalized_odds_difference": 0.0664,
+    "equal_opportunity_difference": 0.0664,
+    "reference_group": {
+      "name": "Mature (Age>=30)",
+      "selection_rate": 0.565,
+      "true_positive_rate": 0.6305,
+      "false_positive_rate": 0.4363
+    },
+    "protected_group": {
+      "name": "Young (Age<30)",
+      "selection_rate": 0.4944,
+      "true_positive_rate": 0.5642,
+      "false_positive_rate": 0.418
+    },
+    "four_fifths_rule_passed": true
+  },
+  "subgroup_calibration": {
+    "Mature (Age>=30)": {
+      "sample_size": 3301,
+      "base_rate": 0.6625265071190548,
+      "brier_score": 0.2128,
+      "ece": 0.02723,
+      "prob_true": [
+        0.25,
+        0.26666666666666666,
+        0.47706422018348627,
+        0.47104247104247104,
+        0.5736925515055468,
+        0.693969396939694,
+        0.7361419068736141,
+        0.8,
+        0.95
+      ],
+      "prob_pred": [
+        0.17852448672056198,
+        0.2753228858113289,
+        0.35912040231424736,
+        0.4576579275968912,
+        0.5570708971393845,
+        0.6525021819355893,
+        0.7460322637780014,
+        0.8298974115797814,
+        0.9243947833776474
+      ]
+    },
+    "Young (Age<30)": {
+      "sample_size": 1699,
+      "base_rate": 0.5226603884638023,
+      "brier_score": 0.23977,
+      "ece": 0.02565,
+      "prob_true": [
+        0.0,
+        0.2857142857142857,
+        0.29347826086956524,
+        0.3793103448275862,
+        0.46474358974358976,
+        0.5568181818181818,
+        0.6155778894472361,
+        0.6222222222222222,
+        0.8
+      ],
+      "prob_pred": [
+        0.08155057951807976,
+        0.1751687494771821,
+        0.25968859004585637,
+        0.35502873691431996,
+        0.4531596212241894,
+        0.551518685212641,
+        0.6454980578554336,
+        0.7352563902183815,
+        0.8171409169832865
+      ]
+    }
+  }
+}
