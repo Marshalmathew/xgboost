@@ -1,3 +1,10 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["download_kaggle", "export_study_guide_pdf"]
+
 [project]
 name = "xgboost-mastery"
 version = "0.1.0"
